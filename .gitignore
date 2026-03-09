@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+
+# IDE
+.vscode
+.idea
+
+# Environment files (keep .env.example)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.staging
+
+# Build output
+dist
+build
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Uploads
+uploads
+
+# Coverage
+coverage
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docs
+docs/srs.md
+docs/requirement.md
+docs/database.md
