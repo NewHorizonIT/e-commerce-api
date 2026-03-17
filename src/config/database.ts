@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { config } from './config';
-
+import { AccountEntity } from '@/module/auth/infarstructure/accountEntity';
 
 // TypeORM DataSource Options
 const dataSourceOptions: DataSourceOptions = {
@@ -16,13 +16,12 @@ const dataSourceOptions: DataSourceOptions = {
   logging: config.database.logging,
   poolSize: config.database.maxConnections,
   connectTimeoutMS: config.database.connectionTimeout,
-  entities: ['src/shared/infrastructure/database/entities/**/*.entity.{ts,js}'],
+  entities: [AccountEntity],
   migrations: ['src/shared/infrastructure/database/migrations/**/*.{ts,js}'],
   subscribers: ['src/shared/infrastructure/database/subscribers/**/*.{ts,js}'],
 };
 
 export const AppDataSource = new DataSource(dataSourceOptions);
-
 
 export interface IDatabaseConnection {
   connect(): Promise<void>;
@@ -30,7 +29,6 @@ export interface IDatabaseConnection {
   isConnected(): boolean;
   getDataSource(): DataSource;
 }
-
 
 class DatabaseConnection implements IDatabaseConnection {
   private dataSource: DataSource;
