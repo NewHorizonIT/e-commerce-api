@@ -1,6 +1,8 @@
 import { baseLogger } from './logger';
 
 export const appLogger = {
-  info: (message: string, meta?: any) => baseLogger.info(message, meta),
-  warn: (message: string, meta?: any) => baseLogger.warn(message, meta),
+  debug: (message: string, meta?: Record<string, unknown>) => baseLogger.debug(message, meta),
+  info: (message: string, meta?: Record<string, unknown>) => baseLogger.info(message, meta),
+  warn: (message: string, meta?: Record<string, unknown>) => baseLogger.warn(message, meta),
+  error: (message: string, meta?: Record<string, unknown>) => baseLogger.error(message, meta),
 };

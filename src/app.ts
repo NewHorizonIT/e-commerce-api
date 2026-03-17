@@ -1,21 +1,31 @@
-import { corsMiddleware } from '@/presentation/http/middleware/cors';
-import { rateLimitMiddleware } from '@/presentation/http/middleware/rateLimit';
 import { config } from '@config/config';
-import { loadEnvFile } from '@config/env';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import express from 'express';
-
-// Load environment variables đầu tiên
-loadEnvFile();
+import { authModule } from './module/auth/module';
+import errorHandler from './shared/middleware/errorHandler';
+import notFoundHandler from './shared/middleware/notFoundHandler';
+import helmet from 'helmet';
+import morgan from 'morgan';
 
 const app = express();
-const port = config.app.port;
 
 // ==================== MIDDLEWARES ====================
-app.use(corsMiddleware());
-app.use(rateLimitMiddleware());
-
+app.use(
+  cors({
+    origin: config.cors.origins,
+    methods: config.cors.methods,
+    allowedHeaders: config.cors.allowedHeaders,
+    credentials: config.cors.credentials,
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
+app.use(compression());
+app.use(helmet());
+app.use(morgan('dev'));
 
 // ==================== ROUTES ====================
 app.get('/', (req, res) => {
@@ -25,13 +35,9 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', uptime: process.uptime() });
 });
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/auth`, authModule.router);
 
-// ==================== START SERVER ====================
-app.listen(port, () => {
-  console.log('========================================');
-  console.log('      E-COMMERCE API SERVER STARTED     ');
-  console.log('========================================');
-  console.log(`Environment: ${config.app.env}`);
-  console.log(`Server is running on http://${config.app.host}:${port}`);
-  console.log('========================================');
-});
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+export default app;

@@ -1,5 +1,7 @@
 // Define value objects here
 
+import { InvalidPhoneNumberError } from './errors';
+
 /*
   Example:
 
@@ -16,3 +18,18 @@
     }
   }
 */
+
+export class PhoneNumber {
+  constructor(public value: string) {
+    this.value = value.trim();
+
+    if (!this.validatePhoneNumber(this.value)) {
+      throw new InvalidPhoneNumberError(this.value);
+    }
+  }
+
+  private validatePhoneNumber(phoneNum: string): boolean {
+    const re = /^\d{10,15}$/;
+    return re.test(phoneNum);
+  }
+}
