@@ -1,5 +1,7 @@
 // Implement interface of repository
 
+import { AppDataSource } from '@/config';
+import { injectable } from 'tsyringe';
 import { Repository } from 'typeorm';
 import Account from '../domain/domain';
 import { IAccountRepository } from '../domain/interface';
@@ -20,8 +22,11 @@ import { AccountEntity, AccountMapper } from './accountEntity';
   }
 */
 
+@injectable()
 export class TypeORMAccountRepository implements IAccountRepository {
-  constructor(private readonly repo: Repository<AccountEntity>) {}
+  constructor(
+    private readonly repo: Repository<AccountEntity> = AppDataSource.getRepository(AccountEntity)
+  ) {}
 
   async save(account: Account): Promise<Account> {
     const entity = AccountMapper.toEntity(account);

@@ -1,30 +1,30 @@
 import { NextFunction, Request, Response } from 'express';
 import { verifyJwtToken } from '../utils/jwt';
 import { config } from '@/config';
+import { UnauthorizedError } from '../error/error';
 
 const authenticate = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
+
   if (!authHeader) {
-    return res.status(401).json({ message: 'Authorization header missing' });
+    return next(new UnauthorizedError('Authorization header missing'));
   }
 
-  const token = authHeader.split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ message: 'Token missing' });
+  const [scheme, token] = authHeader.split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    return next(new UnauthorizedError('Authorization header must be Bearer <token>'));
   }
 
-  const payload = verifyJwtToken<{ userId: number; phoneNum: string }>(
+  const payload = verifyJwtToken<{ id: number; phoneNum: string }>(
     token,
     config.jwt.accessToken.secret
   );
-  if (!payload) {
-    return res.status(401).json({ message: 'Invalid or expired token' });
-  }
 
   // Attach user info to request object for downstream handlers
-  req.userId = payload.userId;
+  req.userId = payload.id;
 
-  next();
+  return next();
 };
 
 export default authenticate;

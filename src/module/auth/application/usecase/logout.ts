@@ -2,14 +2,20 @@ import { config } from '@/config';
 import { appLogger } from '@/shared/logging/appLogger';
 import { UnauthorizedError } from '@/shared/error/error';
 import { verifyJwtToken } from '@/shared/utils/jwt';
+import { inject, injectable } from 'tsyringe';
 import { IRefreshTokenStore } from '../module_port';
+import { AUTH_TOKENS } from '../../tokens';
 
 interface RefreshTokenPayload {
   id: number;
 }
 
+@injectable()
 export default class LogoutUseCase {
-  constructor(private readonly refreshTokenStore: IRefreshTokenStore) {}
+  constructor(
+    @inject(AUTH_TOKENS.IRefreshTokenStore)
+    private readonly refreshTokenStore: IRefreshTokenStore
+  ) {}
 
   async execute(refreshToken: string): Promise<void> {
     const payload = verifyJwtToken<RefreshTokenPayload>(

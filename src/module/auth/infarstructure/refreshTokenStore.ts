@@ -1,30 +1,9 @@
 import { config, redisClient } from '@/config';
+import { injectable } from 'tsyringe';
+import { parseDurationToSeconds } from '@/shared/utils/duration';
 import { IRefreshTokenStore } from '../application/module_port';
 
-function parseDurationToSeconds(value: string): number {
-  const match = value.trim().match(/^(\d+)([smhd])$/i);
-
-  if (!match) {
-    return 7 * 24 * 60 * 60;
-  }
-
-  const amount = Number(match[1]);
-  const unit = match[2].toLowerCase();
-
-  switch (unit) {
-    case 's':
-      return amount;
-    case 'm':
-      return amount * 60;
-    case 'h':
-      return amount * 60 * 60;
-    case 'd':
-      return amount * 24 * 60 * 60;
-    default:
-      return 7 * 24 * 60 * 60;
-  }
-}
-
+@injectable()
 export class RedisRefreshTokenStore implements IRefreshTokenStore {
   private readonly ttlSeconds = parseDurationToSeconds(config.jwt.refreshToken.expiresIn);
 
