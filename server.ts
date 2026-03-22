@@ -1,10 +1,14 @@
-import app from './src/app';
+import 'reflect-metadata';
 import { config, databaseConnection, redisClient } from './src/config';
 import { appLogger } from './src/shared/logging/appLogger';
 import { ErrorLogger } from './src/shared/logging/errorLogger';
+import { initContainer } from './src/shared/container';
 
 async function bootstrap(): Promise<void> {
   try {
+    initContainer();
+
+    const { default: app } = await import('./src/app');
     await databaseConnection.connect();
     await redisClient.connect();
 

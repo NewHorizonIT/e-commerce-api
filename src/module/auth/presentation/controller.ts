@@ -5,33 +5,15 @@ import { AuthResponseDTO } from '../application/dtos';
 import { IAuthModulePort } from '../application/module_port';
 import SuccessResponse from '@/shared/response/writeResponse';
 import { StatusCode } from '@/shared/response/statusCode';
+import { parseDurationToMilliseconds } from '@/shared/utils/duration';
+import { inject, injectable } from 'tsyringe';
+import { AUTH_TOKENS } from '../tokens';
 
-function parseDurationToMilliseconds(value: string): number {
-  const match = value.trim().match(/^(\d+)([smhd])$/i);
-
-  if (!match) {
-    return 7 * 24 * 60 * 60 * 1000;
-  }
-
-  const amount = Number(match[1]);
-  const unit = match[2].toLowerCase();
-
-  switch (unit) {
-    case 's':
-      return amount * 1000;
-    case 'm':
-      return amount * 60 * 1000;
-    case 'h':
-      return amount * 60 * 60 * 1000;
-    case 'd':
-      return amount * 24 * 60 * 60 * 1000;
-    default:
-      return 7 * 24 * 60 * 60 * 1000;
-  }
-}
-
+@injectable()
 export class AuthController {
-  constructor(private readonly authModulePort: IAuthModulePort) {}
+  constructor(
+    @inject(AUTH_TOKENS.IAuthModulePort) private readonly authModulePort: IAuthModulePort
+  ) {}
 
   private buildRefreshCookieOptions(): CookieOptions {
     return {
@@ -60,7 +42,11 @@ export class AuthController {
 
     res.cookie('refreshToken', session.refreshToken, this.buildRefreshCookieOptions());
     appLogger.info('Auth register endpoint served', { accountId: session.id });
-    new SuccessResponse(session, 'Account created successfully', StatusCode.CREATED).send(res);
+    new SuccessResponse(
+      this.createResponsePayload(session),
+      'Account created successfully',
+      StatusCode.CREATED
+    ).send(res);
   }
 
   async login(req: Request, res: Response): Promise<void> {
@@ -68,10 +54,7 @@ export class AuthController {
 
     res.cookie('refreshToken', session.refreshToken, this.buildRefreshCookieOptions());
     appLogger.info('Auth login endpoint served', { accountId: session.id });
-    res.status(200).json({
-      status: 'success',
-      data: this.createResponsePayload(session),
-    });
+    new SuccessResponse(this.createResponsePayload(session), undefined, StatusCode.OK).send(res);
   }
 
   async refreshToken(req: Request, res: Response): Promise<void> {
@@ -79,10 +62,7 @@ export class AuthController {
 
     res.cookie('refreshToken', session.refreshToken, this.buildRefreshCookieOptions());
     appLogger.info('Auth refresh endpoint served', { accountId: session.id });
-    res.status(200).json({
-      status: 'success',
-      data: this.createResponsePayload(session),
-    });
+    new SuccessResponse(this.createResponsePayload(session), undefined, StatusCode.OK).send(res);
   }
 
   async logout(req: Request, res: Response): Promise<void> {
@@ -95,9 +75,6 @@ export class AuthController {
 
   async getCurrentSession(req: Request, res: Response): Promise<void> {
     const session = await this.authModulePort.getCurrentSession(req.userId!);
-    res.status(200).json({
-      status: 'success',
-      data: this.createResponsePayload(session),
-    });
+    new SuccessResponse(session, undefined, StatusCode.OK).send(res);
   }
 }

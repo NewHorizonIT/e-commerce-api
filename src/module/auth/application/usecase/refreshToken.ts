@@ -1,19 +1,24 @@
 import { config } from '@/config';
 import { appLogger } from '@/shared/logging/appLogger';
 import { generatePairJwtTokens, verifyJwtToken } from '@/shared/utils/jwt';
+import { inject, injectable } from 'tsyringe';
 import { SessionExpiredError } from '../../domain/errors';
 import { IAccountRepository } from '../../domain/interface';
 import { AuthSessionDTO } from '../dtos';
 import { IRefreshTokenStore } from '../module_port';
 import { AccountIsLockedError, NotFoundAccountError } from './errors';
+import { AUTH_TOKENS } from '../../tokens';
 
 interface RefreshTokenPayload {
   id: number;
 }
 
+@injectable()
 export default class RefreshTokenUseCase {
   constructor(
+    @inject(AUTH_TOKENS.IAccountRepository)
     private readonly accountRepository: IAccountRepository,
+    @inject(AUTH_TOKENS.IRefreshTokenStore)
     private readonly refreshTokenStore: IRefreshTokenStore
   ) {}
 

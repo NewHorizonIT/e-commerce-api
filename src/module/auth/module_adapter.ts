@@ -4,6 +4,7 @@ import {
   AuthSessionInfoDTO,
   CreateAccountDTO,
 } from './application/dtos';
+import { inject, injectable } from 'tsyringe';
 import { IAuthModulePort } from './application/module_port';
 import GetCurrentSessionUseCase from './application/usecase/getCurrentSession';
 import LoginUseCase from './application/usecase/login';
@@ -11,7 +12,9 @@ import LogoutUseCase from './application/usecase/logout';
 import RefreshTokenUseCase from './application/usecase/refreshToken';
 import RegisterUseCase from './application/usecase/register';
 import { IAccountRepository } from './domain/interface';
+import { AUTH_TOKENS } from './tokens';
 
+@injectable()
 export class AuthModuleAdapter implements IAuthModulePort {
   constructor(
     private readonly registerUseCase: RegisterUseCase,
@@ -19,6 +22,7 @@ export class AuthModuleAdapter implements IAuthModulePort {
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly logoutUseCase: LogoutUseCase,
     private readonly getCurrentSessionUseCase: GetCurrentSessionUseCase,
+    @inject(AUTH_TOKENS.IAccountRepository)
     private readonly accountRepository: IAccountRepository
   ) {}
 
