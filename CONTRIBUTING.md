@@ -12,14 +12,14 @@ Mục tiêu là giảm xung đột khi làm song song, giữ chất lượng cod
 
 ### Nhánh hỗ trợ
 
-- `feature/<module>-<ticket>`: phát triển tính năng mới.
+- `feat/<module>-<ticket>`: phát triển tính năng mới.
 - `bugfix/<module>-<ticket>`: sửa lỗi trên `develop`.
 - `release/<version>`: chuẩn bị release (chỉ bugfix nhỏ, docs, versioning).
 - `hotfix/<ticket>`: sửa lỗi khẩn cấp từ `main`.
 
 Ví dụ:
 
-- `feature/cart-123`
+- `feat/cart-123`
 - `bugfix/auth-401-refresh`
 - `release/1.2.0`
 - `hotfix/prod-login-timeout`
