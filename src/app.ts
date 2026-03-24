@@ -3,11 +3,14 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
 import { authModule } from './module/auth/module';
+import { productModule } from './module/product/module';
 import errorHandler from './shared/middleware/errorHandler';
 import notFoundHandler from './shared/middleware/notFoundHandler';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { swaggerSpec, swaggerYamlText } from './config/swagger';
 
 const app = express();
 
@@ -35,7 +38,14 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', uptime: process.uptime() });
 });
+
+app.get('/api-docs.yaml', (_req, res) => {
+  res.type('application/yaml').send(swaggerYamlText);
+});
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/auth`, authModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, productModule.router);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
