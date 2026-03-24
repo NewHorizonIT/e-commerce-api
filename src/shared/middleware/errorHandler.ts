@@ -8,6 +8,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
   }
+  console.error('Unhandled error:', err);
 
   const requestIdHeader = req.headers['x-request-id'];
   const localRequestId =

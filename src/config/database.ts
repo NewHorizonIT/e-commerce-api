@@ -2,6 +2,15 @@ import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { config } from './config';
 import { AccountEntity } from '@/module/auth/infarstructure/accountEntity';
+import {
+  CategoryEntity,
+  ProductEntity,
+  ProductTypeEntity,
+  VariantDetailEntity,
+  VariantEntity,
+  VariantGroupEntity,
+  VariantValueEntity,
+} from '@/module/product/infarstructure/productEntity';
 
 // TypeORM DataSource Options
 const dataSourceOptions: DataSourceOptions = {
@@ -16,7 +25,16 @@ const dataSourceOptions: DataSourceOptions = {
   logging: config.database.logging,
   poolSize: config.database.maxConnections,
   connectTimeoutMS: config.database.connectionTimeout,
-  entities: [AccountEntity],
+  entities: [
+    AccountEntity,
+    CategoryEntity,
+    ProductTypeEntity,
+    ProductEntity,
+    VariantEntity,
+    VariantGroupEntity,
+    VariantValueEntity,
+    VariantDetailEntity,
+  ],
   migrations: ['src/shared/infrastructure/database/migrations/**/*.{ts,js}'],
   subscribers: ['src/shared/infrastructure/database/subscribers/**/*.{ts,js}'],
 };
