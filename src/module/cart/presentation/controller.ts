@@ -1,0 +1,18 @@
+import { inject, injectable } from "tsyringe";
+import { CART_TOKENS } from "../tokens";
+import { ICartModulePort } from "../application/module_port";
+import { Request, Response } from "express";
+import { appLogger } from "@/shared/logging/appLogger";
+import SuccessResponse from "@/shared/response/writeResponse";
+import { StatusCode } from "@/shared/response/statusCode";
+
+@injectable()
+export class CartController {
+    constructor(@inject(CART_TOKENS.ICartModulePort) private readonly cartModulePort: ICartModulePort) { }
+
+    async addCartItem(req: Request, res: Response): Promise<void> {
+        const cart = await this.cartModulePort.addCartItem(req.body);
+        appLogger.info('Item added to cart', { cart: cart.id });
+        new SuccessResponse(cart, 'Item added successfully', StatusCode.CREATED).send(res);
+    }
+}
