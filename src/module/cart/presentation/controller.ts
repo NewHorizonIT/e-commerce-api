@@ -11,13 +11,15 @@ export class CartController {
     constructor(@inject(CART_TOKENS.ICartModulePort) private readonly cartModulePort: ICartModulePort) { }
 
     async addCartItem(req: Request, res: Response): Promise<void> {
-        const cart = await this.cartModulePort.addCartItem(req.body);
+        const { cartId } = req.params as { cartId: string };
+        const cart = await this.cartModulePort.addCartItem(Number(cartId), req.body);
         appLogger.info('Item added to cart', { cart: cart.id });
         new SuccessResponse(cart, 'Item added successfully', StatusCode.CREATED).send(res);
     }
     
     async getCurrentCart(req: Request, res: Response): Promise<void> {
-        const cart = await this.cartModulePort.getCurrentCart(req.body);
+        const { cartId } = req.params as { cartId: string };
+        const cart = await this.cartModulePort.getCurrentCart(Number(cartId));
         new SuccessResponse(cart, undefined, StatusCode.OK).send(res);
     }
 }

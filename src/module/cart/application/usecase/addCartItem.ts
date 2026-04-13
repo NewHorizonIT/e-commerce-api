@@ -13,22 +13,21 @@ export default class AddCartItemUseCase {
     private readonly cartRepository: ICartRepository
   ) { }
 
-  async execute(dto: CartItemDetailDTO): Promise<CartDTO> {
-    const cart = await this.cartRepository.findById(dto.cartId);
+  async execute(cartId: number, dto: CartItemDetailDTO): Promise<CartDTO> {
+    const cart = await this.cartRepository.findById(cartId);
 
     if (!cart) {
-      throw new NotFoundCartErrorById(dto.cartId);
+      throw new NotFoundCartErrorById(cartId);
     }
 
     const item = CartItemDetail.create({
       quantity: new Quantity(dto.quantity),
-      cartId: dto.cartId,
+      cartId: cartId,
       variantId: dto.variantId
     });
     cart.addItem(item);
 
     const savedCart = await this.cartRepository.save(cart);
-    const cartId = savedCart.getRequiredId();
 
     const itemsDTO: CartItemDetailDTO[] = savedCart.getItems().map((item): CartItemDetailDTO => {
       const itemId = item.getRequiredId();
@@ -42,7 +41,7 @@ export default class AddCartItemUseCase {
 
     // Create response
     const response: CartDTO = {
-      id: cartId,
+      id: savedCart.getRequiredId(),
       accountId: savedCart.getAccountId(),
       items: itemsDTO
     };
