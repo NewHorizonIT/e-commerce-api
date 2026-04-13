@@ -9,6 +9,10 @@ export const addCartItemParamSchema = z.object({
   cartId: commonIdSchema,
 });
 
+export const getCurrentCartParamSchema = z.object({
+  cartId: commonIdSchema,
+});
+
 //schema body
 export const addCartItemSchema = z.object({
   quantity: z.coerce.number().int().positive().max(50),

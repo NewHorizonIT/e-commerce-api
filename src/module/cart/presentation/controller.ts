@@ -15,4 +15,9 @@ export class CartController {
         appLogger.info('Item added to cart', { cart: cart.id });
         new SuccessResponse(cart, 'Item added successfully', StatusCode.CREATED).send(res);
     }
+    
+    async getCurrentCart(req: Request, res: Response): Promise<void> {
+        const cart = await this.cartModulePort.getCurrentCart(req.body);
+        new SuccessResponse(cart, undefined, StatusCode.OK).send(res);
+    }
 }
