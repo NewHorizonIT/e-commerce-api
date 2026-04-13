@@ -39,12 +39,16 @@ export class Cart {
     this.items = this.items.filter(i => i.getVariantId() !== variantId);
   }
 
+  public hasVariant(variantId: number): boolean {
+    return this.items.some(i => i.getVariantId() === variantId);
+  }
+
   // Getters and setters
   public getId(): number | null {
     return this.id;
   }
   public getRequiredId(): number {
-    if(this.id === null){
+    if (this.id === null) {
       throw new UnexpectedMissingCartIdError();
     }
     return this.id;
@@ -52,7 +56,7 @@ export class Cart {
   public getAccountId(): number {
     return this.accountId;
   }
-  public getItems(): CartItemDetail[]{
+  public getItems(): CartItemDetail[] {
     return this.items
   }
 }
@@ -84,7 +88,7 @@ export class CartItemDetail {
   }
 
   //bussiness
-  public updateQuantity(newRawQuantity: Quantity): void{
+  public updateQuantity(newRawQuantity: Quantity): void {
     this.quantity = newRawQuantity;
   }
 

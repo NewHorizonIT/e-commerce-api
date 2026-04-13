@@ -6,3 +6,9 @@ export class NotFoundCartErrorById extends AppError {
   }
 }
 
+export class NotFoundCartItemErrorByVariantId extends AppError {
+  constructor(id: number) {
+    super(`Cart Item with Variant ID ${id} not found`, 'NOT_FOUND_CART_ITEM_BY_VARIANT_ID', 404);
+  }
+}
+

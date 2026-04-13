@@ -16,10 +16,17 @@ export class CartController {
         appLogger.info('Item added to cart', { cart: cart.id });
         new SuccessResponse(cart, 'Item added successfully', StatusCode.CREATED).send(res);
     }
-    
+
     async getCurrentCart(req: Request, res: Response): Promise<void> {
         const { cartId } = req.params as { cartId: string };
         const cart = await this.cartModulePort.getCurrentCart(Number(cartId));
+        new SuccessResponse(cart, undefined, StatusCode.OK).send(res);
+    }
+
+    async removeItem(req: Request, res: Response): Promise<void> {
+        const { cartId } = req.params as { cartId: string };
+        const { variantId } = req.params as { variantId: string };
+        const cart = await this.cartModulePort.removeItem(Number(cartId), Number(variantId));
         new SuccessResponse(cart, undefined, StatusCode.OK).send(res);
     }
 }
