@@ -4,7 +4,6 @@ import { CartItemDetailDTO, CartDTO } from "./application/dtos";
 import AddCartItemUseCase from "./application/usecase/addCartItem";
 import GetCurrentCartUseCase from "./application/usecase/getCurrentCart";
 import RemoveItemUseCase from "./application/usecase/removeItem";
-import { Quantity } from './domain/value_objects';
 import UpdateQuantityUseCase from "./application/usecase/updateQuantity";
 
 @injectable()

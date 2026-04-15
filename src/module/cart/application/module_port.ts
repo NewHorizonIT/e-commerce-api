@@ -1,5 +1,4 @@
 import { CartDTO, CreateCartItemDetailDTO } from "./dtos";
-import RemoveItemUseCase from './usecase/removeItem';
 
 export interface ICartModulePort {
   addCartItem(cartId: number,dto: CreateCartItemDetailDTO): Promise<CartDTO>;
