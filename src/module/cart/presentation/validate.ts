@@ -18,10 +18,19 @@ export const removeItemParamSchema = z.object({
   variantId: commonIdSchema
 });
 
+export const updateQuantityParamSchema = z.object({
+  cartId: commonIdSchema,
+  variantId: commonIdSchema
+});
+
 //schema body
 export const addCartItemSchema = z.object({
   quantity: z.coerce.number().int().positive().max(50),
   variantId: commonIdSchema
+});
+
+export const updateQuantitySchema = z.object({
+  quantity: z.coerce.number().int().positive().max(50),
 });
 
 type SchemaMap = {

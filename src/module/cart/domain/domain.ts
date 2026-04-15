@@ -39,6 +39,11 @@ export class Cart {
     this.items = this.items.filter(i => i.getVariantId() !== variantId);
   }
 
+  public findItemByVariantId(variantId: number): CartItemDetail | null {
+    const item = this.items.find(i => i.getVariantId() === variantId);
+    return item || null;
+  }
+
   public hasVariant(variantId: number): boolean {
     return this.items.some(i => i.getVariantId() === variantId);
   }
