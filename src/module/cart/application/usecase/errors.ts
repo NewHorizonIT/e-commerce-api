@@ -12,3 +12,9 @@ export class NotFoundCartItemErrorByVariantId extends AppError {
   }
 }
 
+export class NotFoundCartItemErrorByAccountId extends AppError {
+  constructor(id: number) {
+    super(`Cart Item with Account ID ${id} not found`, 'NOT_FOUND_CART_ITEM_BY_ACCOUNT_ID', 404);
+  }
+}
+

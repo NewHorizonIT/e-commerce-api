@@ -18,8 +18,7 @@ export class CartController {
     }
 
     async getCurrentCart(req: Request, res: Response): Promise<void> {
-        const { cartId } = req.params as { cartId: string };
-        const cart = await this.cartModulePort.getCurrentCart(Number(cartId));
+        const cart = await this.cartModulePort.getCurrentCart(req.userId!);
         new SuccessResponse(cart, undefined, StatusCode.OK).send(res);
     }
 

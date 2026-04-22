@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { CART_TOKENS } from "../../tokens";
 import { ICartRepository } from "../../domain/interface";
-import { NotFoundCartErrorById } from "./errors";
+import { NotFoundCartErrorById, NotFoundCartItemErrorByAccountId } from "./errors";
 import { CartDTO, CartItemDetailDTO } from "../dtos";
 
 @injectable()
@@ -11,11 +11,11 @@ export default class GetCurrentCartUseCase {
     private readonly cartRepository: ICartRepository
   ) { }
 
-  async execute(id: number): Promise<CartDTO> {
-    const cart = await this.cartRepository.findById(id);
+  async execute(accountId: number): Promise<CartDTO> {
+    const cart = await this.cartRepository.findByAccountId(accountId);
 
     if (!cart) {
-      throw new NotFoundCartErrorById(id);
+      throw new NotFoundCartItemErrorByAccountId(accountId);
     }
 
     const cartItems: CartItemDetailDTO[] = cart.getItems().map((item) => {

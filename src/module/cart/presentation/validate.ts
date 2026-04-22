@@ -9,10 +9,6 @@ export const addCartItemParamSchema = z.object({
   cartId: commonIdSchema,
 });
 
-export const getCurrentCartParamSchema = z.object({
-  cartId: commonIdSchema,
-});
-
 export const removeItemParamSchema = z.object({
   cartId: commonIdSchema,
   variantId: commonIdSchema

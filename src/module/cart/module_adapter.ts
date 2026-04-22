@@ -22,8 +22,8 @@ export class CartModuleAdapter implements ICartModulePort {
         return this.addCartItemUseCase.execute(cartId, dto);
     }
 
-    getCurrentCart(id: number): Promise<CartDTO> {
-        return this.getCurrentCartUseCase.execute(id);
+    getCurrentCart(accountId: number): Promise<CartDTO> {
+        return this.getCurrentCartUseCase.execute(accountId);
     }
 
     removeItem(cartId: number, variantId: number) {
