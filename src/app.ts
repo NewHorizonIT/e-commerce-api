@@ -11,6 +11,7 @@ import notFoundHandler from './shared/middleware/notFoundHandler';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { swaggerSpec, swaggerYamlText } from './config/swagger';
+import { orderModule } from './module/order/module';
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/auth`, authModule.router);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, productModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, orderModule.router);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
