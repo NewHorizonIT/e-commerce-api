@@ -570,6 +570,24 @@ paths:
         '204':
           description: Product type deleted
 
+  /carts/me:
+    get:
+      tags: [Cart]
+      summary: Get current cart
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current cart
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/SimpleMessageError'
+                  - $ref: '#/components/schemas/ErrorResponse'
+
   /carts/{cartId}:
     post:
       tags: [Cart]
@@ -585,14 +603,6 @@ paths:
       responses:
         '201':
           description: Item added successfully
-    get:
-      tags: [Cart]
-      summary: Get current cart
-      parameters:
-      - $ref: '#/components/parameters/CartId'
-      responses:
-        '200':
-          description: 
 
   /carts/{cartId}/variants/{variantId}:
     delete:
