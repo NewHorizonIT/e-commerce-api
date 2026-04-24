@@ -11,8 +11,7 @@ export class CartController {
     constructor(@inject(CART_TOKENS.ICartModulePort) private readonly cartModulePort: ICartModulePort) { }
 
     async addCartItem(req: Request, res: Response): Promise<void> {
-        const { cartId } = req.params as { cartId: string };
-        const cart = await this.cartModulePort.addCartItem(Number(cartId), req.body);
+        const cart = await this.cartModulePort.addCartItem(req.userId!, req.body);
         appLogger.info('Item added to cart', { cart: cart.id });
         new SuccessResponse(cart, 'Item added successfully', StatusCode.CREATED).send(res);
     }

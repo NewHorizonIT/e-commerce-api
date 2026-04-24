@@ -5,10 +5,6 @@ import { BadRequestError } from '@/shared/error/error';
 const commonIdSchema = z.coerce.number().int().positive();
 
 //schema param
-export const addCartItemParamSchema = z.object({
-  cartId: commonIdSchema,
-});
-
 export const removeItemParamSchema = z.object({
   cartId: commonIdSchema,
   variantId: commonIdSchema

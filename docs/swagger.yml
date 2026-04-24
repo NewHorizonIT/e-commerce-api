@@ -588,12 +588,12 @@ paths:
                   - $ref: '#/components/schemas/SimpleMessageError'
                   - $ref: '#/components/schemas/ErrorResponse'
 
-  /carts/{cartId}:
+  /carts/items:
     post:
       tags: [Cart]
       summary: Add item to cart
-      parameters:
-      - $ref: '#/components/parameters/CartId'
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -603,7 +603,7 @@ paths:
       responses:
         '201':
           description: Item added successfully
-
+    
   /carts/{cartId}/variants/{variantId}:
     delete:
       tags: [Cart]
