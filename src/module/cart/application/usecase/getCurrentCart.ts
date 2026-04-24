@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { CART_TOKENS } from "../../tokens";
 import { ICartRepository } from "../../domain/interface";
-import { NotFoundCartErrorById, NotFoundCartItemErrorByAccountId } from "./errors";
+import { NotFoundCartItemErrorByAccountId } from "./errors";
 import { CartDTO, CartItemDetailDTO } from "../dtos";
 
 @injectable()
