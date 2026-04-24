@@ -14,8 +14,3 @@ export interface CartItemDetailDTO {
 export interface CreateCartDTO {
     accountId: number
 }
-
-export interface CreateCartItemDetailDTO {
-    quantity: number;
-    variantId: number;
-}

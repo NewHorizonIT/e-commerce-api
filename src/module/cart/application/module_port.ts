@@ -1,7 +1,7 @@
-import { CartDTO, CreateCartItemDetailDTO } from "./dtos";
+import { CartDTO, CartItemDetailDTO } from "./dtos";
 
 export interface ICartModulePort {
-  addCartItem(cartId: number,dto: CreateCartItemDetailDTO): Promise<CartDTO>;
+  addCartItem(cartId: number,dto: CartItemDetailDTO): Promise<CartDTO>;
   getCurrentCart(id: number): Promise<CartDTO>;
   removeItem(cartId: number, variantId: number): Promise<CartDTO>;
   updateQuantity(cartId: number, variantId: number, quantity: number): Promise<CartDTO>;
