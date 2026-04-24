@@ -22,9 +22,8 @@ export class CartController {
     }
 
     async removeItem(req: Request, res: Response): Promise<void> {
-        const { cartId } = req.params as { cartId: string };
         const { variantId } = req.params as { variantId: string };
-        const cart = await this.cartModulePort.removeItem(Number(cartId), Number(variantId));
+        const cart = await this.cartModulePort.removeItem(req.userId!, Number(variantId));
         new SuccessResponse(cart, undefined, StatusCode.OK).send(res);
     }
 

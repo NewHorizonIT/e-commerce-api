@@ -608,8 +608,9 @@ paths:
     delete:
       tags: [Cart]
       summary: Remove cart item
+      security:
+        - bearerAuth: []
       parameters:
-        - $ref: '#/components/parameters/CartId'
         - $ref: '#/components/parameters/VariantId'
       responses:
         '204':

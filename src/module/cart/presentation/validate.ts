@@ -6,7 +6,6 @@ const commonIdSchema = z.coerce.number().int().positive();
 
 //schema param
 export const removeItemParamSchema = z.object({
-  cartId: commonIdSchema,
   variantId: commonIdSchema
 });
 
