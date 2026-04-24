@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { CART_TOKENS } from "../../tokens";
 import { ICartRepository } from "../../domain/interface";
 import { CartDTO, CartItemDetailDTO } from "../dtos";
-import { NotFoundCartErrorById, NotFoundCartItemErrorByVariantId } from "./errors";
+import { NotFoundCartItemErrorByAccountId, NotFoundCartItemErrorByVariantId } from "./errors";
 import { Quantity } from "../../domain/value_objects";
 
 @injectable()
@@ -12,11 +12,11 @@ export default class UpdateQuantityUseCase {
     private readonly cartRepository: ICartRepository
   ) { }
 
-  async execute(cartId: number, variantId: number, quantity: number): Promise<CartDTO> {
-    const cart = await this.cartRepository.findById(cartId);
+  async execute(accountId: number, variantId: number, quantity: number): Promise<CartDTO> {
+    const cart = await this.cartRepository.findByAccountId(accountId);
 
     if (!cart) {
-      throw new NotFoundCartErrorById(cartId);
+      throw new NotFoundCartItemErrorByAccountId(accountId);
     }
 
     // có giữ tham chiếu tới item tương ứng

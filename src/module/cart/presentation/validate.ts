@@ -11,7 +11,6 @@ export const removeItemParamSchema = z.object({
 });
 
 export const updateQuantityParamSchema = z.object({
-  cartId: commonIdSchema,
   variantId: commonIdSchema
 });
 

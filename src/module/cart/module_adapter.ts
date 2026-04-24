@@ -30,7 +30,7 @@ export class CartModuleAdapter implements ICartModulePort {
         return this.removeItemUseCase.execute(cartId, variantId);
     }
 
-    updateQuantity(cartId: number, variantId: number, quantity: number) {
-        return this.updateQuantityUseCase.execute(cartId, variantId, quantity);
+    updateQuantity(accountId: number, variantId: number, quantity: number) {
+        return this.updateQuantityUseCase.execute(accountId, variantId, quantity);
     }
 }

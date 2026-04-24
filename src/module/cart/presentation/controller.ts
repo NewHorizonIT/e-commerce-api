@@ -29,10 +29,9 @@ export class CartController {
     }
 
     async updateQuantity(req: Request, res: Response): Promise<void>{
-        const { cartId } = req.params as { cartId: string };
         const { variantId } = req.params as { variantId: string };
         const { quantity } = req.body as { quantity: number };
-        const cart = await this.cartModulePort.updateQuantity(Number(cartId), Number(variantId), quantity);
+        const cart = await this.cartModulePort.updateQuantity(req.userId!, Number(variantId), quantity);
         new SuccessResponse(cart, undefined, StatusCode.OK).send(res);
     }
 }

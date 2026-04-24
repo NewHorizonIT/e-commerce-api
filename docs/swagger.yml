@@ -604,7 +604,7 @@ paths:
         '201':
           description: Item added successfully
     
-  /carts/{cartId}/variants/{variantId}:
+  /carts/items/{variantId}:
     delete:
       tags: [Cart]
       summary: Remove cart item
@@ -617,8 +617,9 @@ paths:
     patch:
       tags: [Cart]
       summary: Update cart item quantity
+      security:
+        - bearerAuth: []
       parameters:
-        - $ref: '#/components/parameters/CartId'
         - $ref: '#/components/parameters/VariantId'
       requestBody:
         required: true
