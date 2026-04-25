@@ -16,6 +16,10 @@ export class PromotionStatus {
         this.value = value as PromotionStatusEnum;
     }
 
+    public static draft(): PromotionStatus {
+        return new PromotionStatus(PromotionStatusEnum.DRAFT);
+    }
+
     public isDraft(): boolean { 
         return this.value === PromotionStatusEnum.DRAFT; 
     }

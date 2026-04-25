@@ -1,5 +1,5 @@
 import { UnexpectedMissingPromotionDetailIdError, UnexpectedMissingPromotionIdError } from "./errors";
-import { PromotionStatus, PromotionType } from "./value_objects";
+import { PromotionStatus, PromotionStatusEnum, PromotionType } from "./value_objects";
 
 export class PromotionProgram {
     private id: number | null;
@@ -7,23 +7,28 @@ export class PromotionProgram {
     private startTime: Date;
     private endTime: Date;
     private status: PromotionStatus;
+    private details: PromotionDetail[];
     
     private constructor(
         id: number | null,
         name: string,
         startTime: Date,
         endTime: Date,
-        status: PromotionStatus
+        status: PromotionStatus,
+        details: PromotionDetail[]
     ) {
         this.id = id;
         this.name = name;
         this.startTime = startTime;
         this.endTime = endTime;
         this.status = status;
+        this.details = details;
     }
 
-    public static create(params: { name: string; startTime: Date, endTime: Date, status: PromotionStatus }): PromotionProgram {
-        return new PromotionProgram(null, params.name, params.startTime, params.endTime, params.status);
+    public static create(params: { name: string; startTime: Date, endTime: Date, status?: PromotionStatus, details?: PromotionDetail[]}): PromotionProgram {
+        const promotionStatus: PromotionStatus = params.status ?? PromotionStatus.draft(); 
+        const promotionDetails: PromotionDetail[] = params.details ?? [];
+        return new PromotionProgram(null, params.name, params.startTime, params.endTime, promotionStatus, promotionDetails);
     }
 
     public static rehydrate(params: {
@@ -32,13 +37,15 @@ export class PromotionProgram {
         startTime: Date;
         endTime: Date;
         status: PromotionStatus;
+        details: PromotionDetail[]
     }): PromotionProgram {
         return new PromotionProgram(
             params.id,
             params.name,
             params.startTime,
             params.endTime,
-            params.status
+            params.status,
+            params.details
         );
     }
 
@@ -68,6 +75,10 @@ export class PromotionProgram {
         }
         return this.id;
     }
+
+    public getDetails () {
+        return [...this.details];
+    }
 }
 
 export class PromotionDetail {
@@ -76,7 +87,6 @@ export class PromotionDetail {
     private promotionValue: number;
     private productLimit: number;
     private usageLimitPerCustomer: number;
-    private promotionProgramId: number;
     private variantId: number;
 
     private constructor(
@@ -85,7 +95,6 @@ export class PromotionDetail {
         promotionValue: number,
         productLimit: number,
         usageLimitPerCustomer: number,
-        promotionProgramId: number,
         variantId: number
     ) {
         this.id = id;
@@ -93,7 +102,6 @@ export class PromotionDetail {
         this.promotionValue = promotionValue;
         this.productLimit = productLimit;
         this.usageLimitPerCustomer = usageLimitPerCustomer;
-        this.promotionProgramId = promotionProgramId;
         this.variantId = variantId;
     }
 
@@ -102,7 +110,6 @@ export class PromotionDetail {
         promotionValue: number;
         productLimit: number;
         usageLimitPerCustomer: number;
-        promotionProgramId: number;
         variantId: number;
     }): PromotionDetail {
         return new PromotionDetail(
@@ -111,7 +118,6 @@ export class PromotionDetail {
             params.promotionValue,
             params.productLimit,
             params.usageLimitPerCustomer,
-            params.promotionProgramId,
             params.variantId
         );
     }
@@ -122,7 +128,6 @@ export class PromotionDetail {
         promotionValue: number;
         productLimit: number;
         usageLimitPerCustomer: number;
-        promotionProgramId: number;
         variantId: number;
     }): PromotionDetail {
         return new PromotionDetail(
@@ -131,7 +136,6 @@ export class PromotionDetail {
             params.promotionValue,
             params.productLimit,
             params.usageLimitPerCustomer,
-            params.promotionProgramId,
             params.variantId
         );
     }
@@ -161,10 +165,6 @@ export class PromotionDetail {
 
     public getUsageLimitPerCustomer(): number {
         return this.usageLimitPerCustomer;
-    }
-
-    public getPromotionProgramId(): number {
-        return this.promotionProgramId;
     }
 
     public getVariantId(): number {
