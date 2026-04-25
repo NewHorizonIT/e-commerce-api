@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { config } from './config';
-import { AccountEntity } from '@/module/auth/infarstructure/accountEntity';
+import { config } from './config.js';
+import { AccountEntity } from '@/module/auth/infarstructure/accountEntity.js';
 import {
   CategoryEntity,
   ProductEntity,
@@ -10,7 +10,8 @@ import {
   VariantEntity,
   VariantGroupEntity,
   VariantValueEntity,
-} from '@/module/product/infarstructure/productEntity';
+} from '@/module/product/infarstructure/productEntity.js';
+import { ReviewEntity } from '@/module/review/infrastructure/reviewEntity.js';
 
 // TypeORM DataSource Options
 const dataSourceOptions: DataSourceOptions = {
@@ -34,6 +35,7 @@ const dataSourceOptions: DataSourceOptions = {
     VariantGroupEntity,
     VariantValueEntity,
     VariantDetailEntity,
+    ReviewEntity,
   ],
   migrations: ['src/shared/infrastructure/database/migrations/**/*.{ts,js}'],
   subscribers: ['src/shared/infrastructure/database/subscribers/**/*.{ts,js}'],

@@ -17,7 +17,9 @@ import { AUTH_TOKENS } from './tokens';
 @injectable()
 export class AuthModuleAdapter implements IAuthModulePort {
   constructor(
+    @inject(AUTH_TOKENS.RegisterUseCase)
     private readonly registerUseCase: RegisterUseCase,
+    @inject(AUTH_TOKENS.LoginUseCase)
     private readonly loginUseCase: LoginUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly logoutUseCase: LogoutUseCase,
