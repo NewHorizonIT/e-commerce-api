@@ -87,8 +87,8 @@ export class PromotionMapper {
         });
     }
 
-    static toEntity(domain: PromotionProgram): { domainEntity: PromotionProgramEntity, detailEntities: PromotionDetailEntity[] } {
-        const domainEntity = new PromotionProgramEntity();
+    static toEntity(domain: PromotionProgram): { promotionEntity: PromotionProgramEntity, detailEntities: PromotionDetailEntity[] } {
+        const promotionEntity = new PromotionProgramEntity();
 
         const detailEntities: PromotionDetailEntity[] = domain.getDetails().map(detail => {
             const detailEntity = new PromotionDetailEntity();
@@ -102,12 +102,12 @@ export class PromotionMapper {
             return detailEntity;
         });
 
-        domainEntity.id = domain.getRequiredId();
-        domainEntity.name = domain.getName();
-        domainEntity.startTime = domain.getStartTime();
-        domainEntity.endTime = domain.getEndTime();
-        domainEntity.status = domain.getStatus().value;
+        promotionEntity.id = domain.getRequiredId();
+        promotionEntity.name = domain.getName();
+        promotionEntity.startTime = domain.getStartTime();
+        promotionEntity.endTime = domain.getEndTime();
+        promotionEntity.status = domain.getStatus().value;
 
-        return {domainEntity, detailEntities};
+        return {promotionEntity, detailEntities};
     }
 }

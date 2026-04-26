@@ -1,8 +1,8 @@
-import { PromotionDetail, PromotionProgram } from "./domain";
+import { PromotionProgram } from "./domain";
 
 export interface IPromotionRepository {
+  getAll(): Promise<PromotionProgram[]>
   findById(id: number): Promise<PromotionProgram | null>;
-  findByAccountId(accountId: number): Promise<PromotionProgram[] | null>
   save(promotion: PromotionProgram): Promise<PromotionProgram>;
   delete(id: number): Promise<void>;
 }
