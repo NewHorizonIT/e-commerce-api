@@ -12,6 +12,8 @@ import {
   VariantValueEntity,
 } from '@/module/product/infarstructure/productEntity.js';
 import { ReviewEntity } from '@/module/review/infrastructure/reviewEntity.js';
+} from '@/module/product/infarstructure/productEntity';
+import { CartEntity, CartItemDetailEntity } from '@/module/cart/infrastructure/cartEntity';
 
 // TypeORM DataSource Options
 const dataSourceOptions: DataSourceOptions = {
@@ -36,6 +38,8 @@ const dataSourceOptions: DataSourceOptions = {
     VariantValueEntity,
     VariantDetailEntity,
     ReviewEntity,
+    CartItemDetailEntity,
+    CartEntity,
   ],
   migrations: ['src/shared/infrastructure/database/migrations/**/*.{ts,js}'],
   subscribers: ['src/shared/infrastructure/database/subscribers/**/*.{ts,js}'],
