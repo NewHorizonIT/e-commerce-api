@@ -5,7 +5,7 @@ info:
   description: API documentation synchronized with currently implemented Auth and Product modules.
 
 servers:
-  - url: http://localhost:4444/api/v1
+  - url: http://localhost:3000/api/v1
     description: Local development
 
 tags:
@@ -15,6 +15,8 @@ tags:
     description: Public product browsing APIs
   - name: Product Admin
     description: Product management APIs (requires access token)
+  - name: Cart 
+    description: Cart management APIs
 
 paths:
   /auth/accounts:
@@ -568,6 +570,69 @@ paths:
         '204':
           description: Product type deleted
 
+  /carts/me:
+    get:
+      tags: [Cart]
+      summary: Get current cart
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current cart
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/SimpleMessageError'
+                  - $ref: '#/components/schemas/ErrorResponse'
+
+  /carts/items:
+    post:
+      tags: [Cart]
+      summary: Add item to cart
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddItemToCartRequest'
+      responses:
+        '201':
+          description: Item added successfully
+    
+  /carts/items/{variantId}:
+    delete:
+      tags: [Cart]
+      summary: Remove cart item
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/VariantId'
+      responses:
+        '204':
+          description:
+    patch:
+      tags: [Cart]
+      summary: Update cart item quantity
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/VariantId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartItemDetailQuantity'
+      responses:
+        '200':
+          description: 
+
+
 components:
   securitySchemes:
     bearerAuth:
@@ -684,6 +749,13 @@ components:
         minimum: 1
     ProductTypeId:
       name: productTypeId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    CartId:
+      name: cartId
       in: path
       required: true
       schema:
@@ -1042,3 +1114,29 @@ components:
         name:
           type: string
           maxLength: 255
+    
+    CartItemQuantity:
+      type: integer
+      minimum: 1
+      maximum: 50
+      example: 1
+    
+    AddItemToCartRequest:
+      type: object
+      required: [variantId, quantity]
+      properties:
+        variantId:
+          type: integer
+          minimum: 1
+        quantity:
+          $ref: '#/components/schemas/CartItemQuantity' 
+    
+    UpdateCartItemDetailQuantity:
+      type: object
+      required: [quantity]
+      properties:
+        quantity:
+          $ref: '#/components/schemas/CartItemQuantity' 
+
+
+
