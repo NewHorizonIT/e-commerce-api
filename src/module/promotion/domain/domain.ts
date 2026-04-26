@@ -49,6 +49,10 @@ export class PromotionProgram {
         );
     }
 
+    public updateDetails(newDetails :PromotionDetail[]){
+        this.details = [...newDetails];
+    } 
+
     public getId(): number | null {
         return this.id;
     }
