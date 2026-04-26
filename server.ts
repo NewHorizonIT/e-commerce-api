@@ -22,6 +22,7 @@ async function bootstrap(): Promise<void> {
 
     server.on('close', () => appLogger.warn('Server is shutting down...'));
   } catch (error) {
+    console.error('Server bootstrap failed:', error);
     ErrorLogger.error('Server bootstrap failed', 'SERVER_BOOTSTRAP_FAILED', {
       cause: error,
     });
