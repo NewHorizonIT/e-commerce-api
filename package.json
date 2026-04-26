@@ -8,6 +8,7 @@
     "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
     "seed:product": "tsx scripts/seed-product.ts",
+    "seed:order": "tsx scripts/seed-order.ts",
     "seed:cart": "tsx scripts/seed-cart.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

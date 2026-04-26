@@ -15,6 +15,10 @@ tags:
     description: Public product browsing APIs
   - name: Product Admin
     description: Product management APIs (requires access token)
+  - name: Order Public
+    description: Public order browsing APIs
+  - name: Order Admin
+    description: Admin order management APIs
   - name: Cart 
     description: Cart management APIs
 
@@ -570,6 +574,35 @@ paths:
         '204':
           description: Product type deleted
 
+  /orders:
+    get:
+      tags: [Order]
+      summary: List orders of current user
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Orders list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PaginatedOrders'
+
+    post:
+      tags: [Order]
+      summary: Create order
   /carts/me:
     get:
       tags: [Cart]
@@ -599,6 +632,82 @@ paths:
         content:
           application/json:
             schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created
+
+  /orders/{orderId}:
+    get:
+      tags: [Order]
+      summary: Get order detail
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/OrderDetail'
+
+  /admin/orders:
+    get:
+      tags: [Order Admin]
+      summary: List all orders (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: accountId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Orders list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PaginatedOrders'
+
+  /admin/orders/{orderId}:
+    get:
+      tags: [Order Admin]
+      summary: Get order detail (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order detail
+
+  /admin/orders/{orderId}/status:
+    patch:
+      tags: [Order Admin]
+      summary: Update order status
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
               $ref: '#/components/schemas/AddItemToCartRequest'
       responses:
         '201':
@@ -627,6 +736,10 @@ paths:
         content:
           application/json:
             schema:
+              $ref: '#/components/schemas/UpdateOrderStatusRequest'
+      responses:
+        '200':
+          description: Status updated
               $ref: '#/components/schemas/UpdateCartItemDetailQuantity'
       responses:
         '200':
@@ -754,6 +867,8 @@ components:
       schema:
         type: integer
         minimum: 1
+    OrderId:
+      name: orderId
     CartId:
       name: cartId
       in: path
@@ -1114,6 +1229,179 @@ components:
         name:
           type: string
           maxLength: 255
+
+    PaginatedOrders:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderSummary'
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+    
+    OrderSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+        orderDate:
+          type: string
+          format: date-time
+        totalProductAmount:
+          type: number
+        shippingFee:
+          type: number
+        discountAmount:
+          type: number
+        totalAmount:
+          type: number
+        isPaid:
+          type: boolean
+
+    OrderDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+        orderDate:
+          type: string
+          format: date-time
+
+        totalProductAmount:
+          type: number
+        shippingFee:
+          type: number
+        discountAmount:
+          type: number
+        totalAmount:
+          type: number
+
+        isPaid:
+          type: boolean
+        paymentMethod:
+          type: string
+
+        bankTransferTime:
+          type: string
+          format: date-time
+          nullable: true
+        bankTransferTransactionCode:
+          type: string
+          nullable: true
+
+        note:
+          type: string
+          nullable: true
+
+        accountId:
+          type: integer
+        shippingInfoId:
+          type: integer
+        discountCodeId:
+          type: integer
+          nullable: true
+
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+
+        histories:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderStatusHistory'
+    
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        productNameSnapshot:
+          type: string
+        variantNameSnapshot:
+          type: string
+        priceBeforeDiscount:
+          type: number
+        priceAfterDiscount:
+          type: number
+        quantity:
+          type: integer
+        totalAmount:
+          type: number
+        variantId:
+          type: integer
+
+    CreateOrderRequest:
+      type: object
+      required: [paymentMethod, accountId, shippingInfoId, items]
+      properties:
+        shippingFee:
+          type: number
+        discountAmount:
+          type: number
+
+        paymentMethod:
+          type: string
+
+        note:
+          type: string
+
+        accountId:
+          type: integer
+        shippingInfoId:
+          type: integer
+        discountCodeId:
+          type: integer
+          nullable: true
+
+        items:
+          type: array
+          items:
+            type: object
+            required: [variantId, quantity]
+            properties:
+              variantId:
+                type: integer
+              quantity:
+                type: integer
+                minimum: 1
+
+    UpdateOrderPaymentRequest:
+      type: object
+      required: [isPaid, paymentMethod]
+      properties:
+        isPaid:
+          type: boolean
+        paymentMethod:
+          type: string
+        bankTransferTime:
+          type: string
+          format: date-time
+          nullable: true
+        bankTransferTransactionCode:
+          type: string
+          nullable: true  
+
+    UpdateOrderStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED]
+        note:
+          type: string
     
     CartItemQuantity:
       type: integer

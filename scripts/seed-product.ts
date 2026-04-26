@@ -10,6 +10,17 @@ import {
   VariantGroupEntity,
   VariantValueEntity,
 } from '../src/module/product/infarstructure/productEntity';
+import {
+  OrderEntity,
+  OrderItemEntity,
+  OrderStatusHistoryEntity,
+} from '../src/module/order/infrastructure/order-entity';
+import {
+  ORDER_STATUS_VALUE,
+  OrderStatus,
+  PAYMENT_METHOD_VALUE,
+  PaymentMethod,
+} from '../src/module/order/domain/value_objects';
 
 async function seed(): Promise<void> {
   await AppDataSource.initialize();
@@ -23,6 +34,9 @@ async function seed(): Promise<void> {
     const variantGroupRepo = AppDataSource.getRepository(VariantGroupEntity);
     const variantValueRepo = AppDataSource.getRepository(VariantValueEntity);
     const variantDetailRepo = AppDataSource.getRepository(VariantDetailEntity);
+    // const orderRepo = AppDataSource.getRepository(OrderEntity);
+    // const orderItemRepo = AppDataSource.getRepository(OrderItemEntity);
+    // const orderHistoryRepo = AppDataSource.getRepository(OrderStatusHistoryEntity);
 
     const queryRunner = AppDataSource.createQueryRunner();
     await queryRunner.connect();
@@ -39,7 +53,6 @@ async function seed(): Promise<void> {
         .getMany();
 
       const existingProductIds = existingSeedProducts.map((product) => product.id);
-
       if (existingProductIds.length > 0) {
         await queryRunner.query(
           `
@@ -226,6 +239,90 @@ async function seed(): Promise<void> {
         imageUrl: null,
       })
     );
+
+    // /***
+    //  *
+    //  * ORDER - ORDER ITEM - ORDER STATUS HISTORY
+    //  *
+    //  ***/
+    // const account = await accountRepo.findOne({
+    //   where: { phoneNum: '0912345678' },
+    // });
+    // if (!account) throw new Error('Seed account not found');
+    // const variants = await variantRepo.find();
+    // if (variants.length === 0) throw new Error('No variants found');
+
+    // const order = await orderRepo.save(
+    //   orderRepo.create({
+    //     status: ORDER_STATUS_VALUE.PENDING,
+    //     orderDate: new Date(),
+    //     totalProductAmount: 0, // sẽ tính phía dưới
+    //     shippingFee: 30000,
+    //     discountAmount: 50000,
+    //     totalAmount: 0,
+    //     isPaid: false,
+    //     paymentMethod: PAYMENT_METHOD_VALUE.CASH_ON_DELIVERY,
+    //     note: 'Seed order for testing',
+    //     accountId: account.id,
+    //     shippingInfoId: 1, // ⚠️ cần tồn tại trong DB của bạn
+    //     discountCodeId: null,
+    //   })
+    // );
+
+    // const itemsData = [
+    //   {
+    //     variant: variants[0],
+    //     quantity: 1,
+    //   },
+    //   {
+    //     variant: variants[1],
+    //     quantity: 2,
+    //   },
+    // ];
+    // let totalProductAmount = 0;
+
+    // const orderItems = [];
+    // for (const item of itemsData) {
+    //   const priceBefore = item.variant.price;
+    //   const priceAfter = priceBefore; // CHƯA ÁP DISCOUNT
+
+    //   const total = priceAfter * item.quantity;
+
+    //   totalProductAmount += total;
+
+    //   orderItems.push(
+    //     orderItemRepo.create({
+    //       orderId: order.id,
+    //       variantId: item.variant.id,
+    //       productNameSnapshot: item.variant.product.name,
+    //       variantNameSnapshot: item.variant.product.name, // CẦN FIX CHỖ NÀY
+    //       priceBeforeDiscount: priceBefore,
+    //       priceAfterDiscount: priceAfter,
+    //       quantity: item.quantity,
+    //       totalAmount: total,
+    //     })
+    //   );
+    // }
+
+    // const finalTotal = totalProductAmount + order.shippingFee - order.discountAmount;
+
+    // await orderRepo.update(order.id, {
+    //   totalProductAmount,
+    //   totalAmount: finalTotal,
+    // });
+
+    // await orderItemRepo.save(orderItems);
+    // await orderHistoryRepo.save([
+    //   orderHistoryRepo.create({
+    //     orderId: order.id,
+    //     oldStatus: null,
+    //     newStatus: ORDER_STATUS_VALUE.PENDING,
+    //     note: 'Order created',
+    //     changedAt: new Date(),
+    //   }),
+    // ]);
+
+    // console.log('Order seed created successfully.');
 
     console.log('Seed completed successfully.');
     console.log('Test account: 0912345678 / Password123');
