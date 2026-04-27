@@ -5,7 +5,7 @@ info:
   description: API documentation synchronized with currently implemented Auth and Product modules.
 
 servers:
-  - url: http://localhost:3000/api/v1
+  - url: http://localhost:4444/api/v1
     description: Local development
 
 tags:
@@ -19,7 +19,7 @@ tags:
     description: Public order browsing APIs
   - name: Order Admin
     description: Admin order management APIs
-  - name: Cart 
+  - name: Cart
     description: Cart management APIs
 
 paths:
@@ -576,17 +576,38 @@ paths:
 
   /orders:
     get:
-      tags: [Order]
-      summary: List orders of current user
+      tags: [Order Public]
+      summary: List current user's orders
       security:
         - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Limit'
+        - name: shippingInfoId
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: discountCodeId
+          in: query
+          schema:
+            type: integer
+            minimum: 1
         - name: status
           in: query
           schema:
             type: string
+            enum: [pending, confirmed, shipping, delivered, reviewed, cancelled]
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [orderDate, totalAmount]
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
       responses:
         '200':
           description: Orders list
@@ -601,8 +622,156 @@ paths:
                         $ref: '#/components/schemas/PaginatedOrders'
 
     post:
-      tags: [Order]
+      tags: [Order Public]
       summary: Create order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/OrderDetail'
+
+  /orders/{orderId}:
+    get:
+      tags: [Order Public]
+      summary: Get current user's order detail
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/OrderDetail'
+        '403':
+          description: Forbidden when accessing another user's order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/admin/orders:
+    get:
+      tags: [Order Admin]
+      summary: List all orders (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: accountId
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: shippingInfoId
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: discountCodeId
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, confirmed, shipping, delivered, reviewed, cancelled]
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [orderDate, totalAmount]
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: Orders list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PaginatedOrders'
+
+  /orders/admin/orders/{orderId}:
+    get:
+      tags: [Order Admin]
+      summary: Get order detail (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/OrderDetail'
+
+  /orders/admin/orders/{orderId}/status:
+    patch:
+      tags: [Order Admin]
+      summary: Update order status
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderStatusRequest'
+      responses:
+        '200':
+          description: Order status updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/OrderDetail'
+
   /carts/me:
     get:
       tags: [Cart]
@@ -612,6 +781,15 @@ paths:
       responses:
         '200':
           description: Current cart
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Cart'
         '401':
           description: Unauthorized
           content:
@@ -632,87 +810,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrderRequest'
-      responses:
-        '201':
-          description: Order created
-
-  /orders/{orderId}:
-    get:
-      tags: [Order]
-      summary: Get order detail
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/OrderId'
-      responses:
-        '200':
-          description: Order detail
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessEnvelope'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/OrderDetail'
-
-  /admin/orders:
-    get:
-      tags: [Order Admin]
-      summary: List all orders (admin)
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/Limit'
-        - name: status
-          in: query
-          schema:
-            type: string
-        - name: accountId
-          in: query
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Orders list
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessEnvelope'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/PaginatedOrders'
-
-  /admin/orders/{orderId}:
-    get:
-      tags: [Order Admin]
-      summary: Get order detail (admin)
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/OrderId'
-      responses:
-        '200':
-          description: Order detail
-
-  /admin/orders/{orderId}/status:
-    patch:
-      tags: [Order Admin]
-      summary: Update order status
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/OrderId'
               $ref: '#/components/schemas/AddItemToCartRequest'
       responses:
         '201':
           description: Item added successfully
-    
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Cart'
+
   /carts/items/{variantId}:
     delete:
       tags: [Cart]
@@ -722,8 +833,17 @@ paths:
       parameters:
         - $ref: '#/components/parameters/VariantId'
       responses:
-        '204':
-          description:
+        '200':
+          description: Item removed successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Cart'
     patch:
       tags: [Cart]
       summary: Update cart item quantity
@@ -736,15 +856,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateOrderStatusRequest'
-      responses:
-        '200':
-          description: Status updated
               $ref: '#/components/schemas/UpdateCartItemDetailQuantity'
       responses:
         '200':
-          description: 
-
+          description: Cart item quantity updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Cart'
 
 components:
   securitySchemes:
@@ -869,6 +993,11 @@ components:
         minimum: 1
     OrderId:
       name: orderId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
     CartId:
       name: cartId
       in: path
@@ -1245,7 +1374,7 @@ components:
           type: integer
         totalPages:
           type: integer
-    
+
     OrderSummary:
       type: object
       properties:
@@ -1321,7 +1450,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderStatusHistory'
-    
+
     OrderItem:
       type: object
       properties:
@@ -1342,9 +1471,26 @@ components:
         variantId:
           type: integer
 
+    OrderStatusHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+        note:
+          type: string
+          nullable: true
+        changedAt:
+          type: string
+          format: date-time
+        oldStatus:
+          type: string
+          nullable: true
+        newStatus:
+          type: string
+
     CreateOrderRequest:
       type: object
-      required: [paymentMethod, accountId, shippingInfoId, items]
+      required: [paymentMethod, shippingInfoId, items]
       properties:
         shippingFee:
           type: number
@@ -1353,12 +1499,14 @@ components:
 
         paymentMethod:
           type: string
+          enum: [cash_on_delivery, bank_transfer]
 
         note:
           type: string
 
         accountId:
           type: integer
+          description: Ignored by server. Account is derived from access token.
         shippingInfoId:
           type: integer
         discountCodeId:
@@ -1385,13 +1533,14 @@ components:
           type: boolean
         paymentMethod:
           type: string
+          enum: [cash_on_delivery, bank_transfer]
         bankTransferTime:
           type: string
           format: date-time
           nullable: true
         bankTransferTransactionCode:
           type: string
-          nullable: true  
+          nullable: true
 
     UpdateOrderStatusRequest:
       type: object
@@ -1399,16 +1548,16 @@ components:
       properties:
         status:
           type: string
-          enum: [PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED]
+          enum: [pending, confirmed, shipping, delivered, reviewed, cancelled]
         note:
           type: string
-    
+
     CartItemQuantity:
       type: integer
       minimum: 1
       maximum: 50
       example: 1
-    
+
     AddItemToCartRequest:
       type: object
       required: [variantId, quantity]
@@ -1417,14 +1566,35 @@ components:
           type: integer
           minimum: 1
         quantity:
-          $ref: '#/components/schemas/CartItemQuantity' 
-    
+          $ref: '#/components/schemas/CartItemQuantity'
+
     UpdateCartItemDetailQuantity:
       type: object
       required: [quantity]
       properties:
         quantity:
-          $ref: '#/components/schemas/CartItemQuantity' 
+          $ref: '#/components/schemas/CartItemQuantity'
 
+    CartItemDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        quantity:
+          $ref: '#/components/schemas/CartItemQuantity'
+        cartId:
+          type: integer
+        variantId:
+          type: integer
 
-
+    Cart:
+      type: object
+      properties:
+        id:
+          type: integer
+        accountId:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItemDetail'

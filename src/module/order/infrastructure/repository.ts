@@ -2,7 +2,7 @@ import { AppDataSource } from '@/config';
 import { injectable } from 'tsyringe';
 import { Repository } from 'typeorm';
 import { IOrderRepository } from '../domain/interface';
-import { OrderEntity } from './order-entity';
+import { OrderEntity, OrderItemEntity, OrderStatusHistoryEntity } from './order-entity';
 import {
   OrderListQueryDTO,
   PaginatedOrdersDTO,
@@ -26,6 +26,11 @@ import { FailedOrderCreationError } from '../domain/errors';
 
 @injectable()
 export class TypeORMOrderRepository implements IOrderRepository {
+  private toIsoString(value: Date | string): string {
+    const date = value instanceof Date ? value : new Date(value);
+    return Number.isNaN(date.getTime()) ? new Date(0).toISOString() : date.toISOString();
+  }
+
   constructor(
     private readonly orderRepo: Repository<OrderEntity> = AppDataSource.getRepository(OrderEntity),
     private readonly variantRepo: Repository<VariantEntity> = AppDataSource.getRepository(
@@ -73,7 +78,7 @@ export class TypeORMOrderRepository implements IOrderRepository {
       items: rows.map((o) => ({
         id: o.id,
         status: o.status as OrderStatus,
-        orderDate: new Date(o.orderDate).toISOString(),
+        orderDate: this.toIsoString(o.orderDate),
         totalProductAmount: o.totalProductAmount,
         shippingFee: o.shippingFee,
         discountAmount: o.discountAmount,
@@ -98,14 +103,14 @@ export class TypeORMOrderRepository implements IOrderRepository {
     return {
       id: order.id,
       status: order.status as OrderStatus,
-      orderDate: order.orderDate.toISOString(),
+      orderDate: this.toIsoString(order.orderDate),
       totalProductAmount: order.totalProductAmount,
       shippingFee: order.shippingFee,
       discountAmount: order.discountAmount,
       totalAmount: order.totalAmount,
       isPaid: order.isPaid,
       paymentMethod: order.paymentMethod as PaymentMethod,
-      bankTransferTime: order.bankTransferTime?.toISOString() ?? null,
+      bankTransferTime: order.bankTransferTime ? this.toIsoString(order.bankTransferTime) : null,
       bankTransferTransactionCode: order.bankTransferTransactionCode,
       note: order.note,
       accountId: order.accountId,
@@ -124,7 +129,7 @@ export class TypeORMOrderRepository implements IOrderRepository {
       histories: order.histories.map((h) => ({
         id: h.id,
         note: h.note,
-        changedAt: h.changedAt.toISOString(),
+        changedAt: this.toIsoString(h.changedAt),
         oldStatus: h.oldStatus,
         newStatus: h.newStatus,
       })),
@@ -158,21 +163,35 @@ export class TypeORMOrderRepository implements IOrderRepository {
       for (const item of dto.items) {
         const variant = await this.variantRepo.findOne({
           where: { id: item.variantId },
+          relations: {
+            product: true,
+            details: {
+              value: true,
+            },
+          },
         });
         if (!variant) throw new VariantNotFoundError(item.variantId);
+
+        const variantNameSnapshot =
+          variant.details.length > 0
+            ? variant.details
+                .map((detail) => detail.value.value)
+                .filter(Boolean)
+                .join(' / ')
+            : variant.product.name;
 
         const total = variant.price * item.quantity;
         totalProductAmount += total;
 
-        await queryRunner.manager.insert('order_items', {
-          product_name_snapshot: variant.product.name,
-          variant_name_snapshot: variant.product.name, // CHỖ NÀY CẦN FIX NÈ QUÂN !!!
-          price_before_discount: variant.price,
-          price_after_discount: variant.price,
+        await queryRunner.manager.insert(OrderItemEntity, {
+          productNameSnapshot: variant.product.name,
+          variantNameSnapshot,
+          priceBeforeDiscount: variant.price,
+          priceAfterDiscount: variant.price,
           quantity: item.quantity,
-          total_amount: total,
-          order_id: savedOrder.id,
-          variant_id: item.variantId,
+          totalAmount: total,
+          orderId: savedOrder.id,
+          variantId: item.variantId,
         });
       }
 
@@ -231,12 +250,12 @@ export class TypeORMOrderRepository implements IOrderRepository {
 
       await queryRunner.manager.save(order);
 
-      await queryRunner.manager.insert('order_status_histories', {
+      await queryRunner.manager.insert(OrderStatusHistoryEntity, {
         note: dto.note ?? null,
-        changed_at: new Date(),
-        old_status: oldStatus,
-        new_status: dto.status,
-        order_id: orderId,
+        changedAt: new Date(),
+        oldStatus,
+        newStatus: dto.status,
+        orderId,
       });
 
       await queryRunner.commitTransaction();

@@ -20,8 +20,6 @@ export class AuthModuleAdapter implements IAuthModulePort {
     @inject(AUTH_TOKENS.RegisterUseCase)
     private readonly registerUseCase: RegisterUseCase,
     @inject(AUTH_TOKENS.LoginUseCase)
-    @inject(RegisterUseCase)
-    private readonly registerUseCase: RegisterUseCase,
     @inject(LoginUseCase)
     private readonly loginUseCase: LoginUseCase,
     @inject(RefreshTokenUseCase)

@@ -49,7 +49,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/auth`, authModule.router);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, productModule.router);
-app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, orderModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/orders`, orderModule.router);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, reviewModule.router);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, cartModule.router);
 

@@ -86,7 +86,7 @@ export const createOrderSchema = z.object({
 
   note: z.string().trim().max(255).optional(),
 
-  accountId: z.coerce.number().int().positive(),
+  accountId: z.coerce.number().int().positive().optional(),
   shippingInfoId: z.coerce.number().int().positive(),
   discountCodeId: z.coerce.number().int().positive().optional(),
 

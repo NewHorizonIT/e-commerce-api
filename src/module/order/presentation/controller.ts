@@ -3,23 +3,40 @@ import { IOrderModulePort } from '../application/module_port';
 import { appLogger } from '@/shared/logging/appLogger';
 import SuccessResponse from '@/shared/response/writeResponse';
 import { StatusCode } from '@/shared/response/statusCode';
+import { ForbiddenError } from '@/shared/error/error';
 
 export class OrderController {
   constructor(private readonly orderModulePort: IOrderModulePort) {}
 
+  private isAdminRequest(req: Request): boolean {
+    return req.originalUrl.includes('/admin/');
+  }
+
   async listOrders(req: Request, res: Response): Promise<void> {
-    const orders = await this.orderModulePort.listOrders(req.query as never);
+    const query = this.isAdminRequest(req)
+      ? req.query
+      : { ...req.query, accountId: String(req.userId) };
+
+    const orders = await this.orderModulePort.listOrders(query as never);
     new SuccessResponse(orders, undefined, StatusCode.OK).send(res);
   }
 
   async findOrderById(req: Request, res: Response): Promise<void> {
     const { orderId } = req.params as { orderId: string };
     const order = await this.orderModulePort.findOrderById(Number(orderId));
+
+    if (!this.isAdminRequest(req) && order.accountId !== req.userId) {
+      throw new ForbiddenError('You do not have permission to access this order');
+    }
+
     new SuccessResponse(order, undefined, StatusCode.OK).send(res);
   }
 
   async createOrder(req: Request, res: Response): Promise<void> {
-    const order = await this.orderModulePort.createOrder(req.body);
+    const order = await this.orderModulePort.createOrder({
+      ...req.body,
+      accountId: req.userId!,
+    });
     appLogger.info('Order created', { orderId: order.id });
     new SuccessResponse(order, 'Order created successfully', StatusCode.CREATED).send(res);
   }

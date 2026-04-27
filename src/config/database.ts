@@ -12,7 +12,6 @@ import {
   VariantValueEntity,
 } from '@/module/product/infarstructure/productEntity.js';
 import { ReviewEntity } from '@/module/review/infrastructure/reviewEntity.js';
-} from '@/module/product/infarstructure/productEntity';
 import {
   OrderEntity,
   OrderItemEntity,

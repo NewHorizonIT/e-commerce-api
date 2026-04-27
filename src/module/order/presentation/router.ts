@@ -18,21 +18,21 @@ export function createOrderRouter(controller: OrderController): Router {
 
   // ===== Public / User =====
   router.get(
-    '/orders',
-    // authenticate,
+    '/',
+    authenticate,
     validateRequest({ query: listOrdersQuerySchema }),
     controller.listOrders.bind(controller)
   );
 
   router.get(
-    '/orders/:orderId',
+    '/:orderId',
     authenticate,
     validateRequest({ params: orderIdParamSchema }),
     controller.findOrderById.bind(controller)
   );
 
   router.post(
-    '/orders',
+    '/',
     authenticate,
     validateRequest({ body: createOrderSchema }),
     controller.createOrder.bind(controller)
