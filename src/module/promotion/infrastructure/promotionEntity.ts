@@ -108,6 +108,6 @@ export class PromotionMapper {
         promotionEntity.endTime = domain.getEndTime();
         promotionEntity.status = domain.getStatus().value;
 
-        return {promotionEntity, detailEntities};
+        return { promotionEntity, detailEntities };
     }
 }

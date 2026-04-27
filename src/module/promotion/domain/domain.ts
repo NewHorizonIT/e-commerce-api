@@ -1,5 +1,5 @@
-import { UnexpectedMissingPromotionDetailIdError, UnexpectedMissingPromotionIdError } from "./errors";
-import { PromotionStatus, PromotionStatusEnum, PromotionType } from "./value_objects";
+import { InvalidTimeRangeError, StartTimeInPastError, UnexpectedMissingPromotionDetailIdError, UnexpectedMissingPromotionIdError } from "./errors";
+import { PromotionStatus, PromotionType } from "./value_objects";
 
 export class PromotionProgram {
     private id: number | null;
@@ -8,7 +8,7 @@ export class PromotionProgram {
     private endTime: Date;
     private status: PromotionStatus;
     private details: PromotionDetail[];
-    
+
     private constructor(
         id: number | null,
         name: string,
@@ -25,8 +25,8 @@ export class PromotionProgram {
         this.details = details;
     }
 
-    public static create(params: { name: string; startTime: Date, endTime: Date, status?: PromotionStatus, details?: PromotionDetail[]}): PromotionProgram {
-        const promotionStatus: PromotionStatus = params.status ?? PromotionStatus.draft(); 
+    public static create(params: { name: string; startTime: Date, endTime: Date, status?: PromotionStatus, details?: PromotionDetail[] }): PromotionProgram {
+        const promotionStatus: PromotionStatus = params.status ?? PromotionStatus.draft();
         const promotionDetails: PromotionDetail[] = params.details ?? [];
         return new PromotionProgram(null, params.name, params.startTime, params.endTime, promotionStatus, promotionDetails);
     }
@@ -49,9 +49,9 @@ export class PromotionProgram {
         );
     }
 
-    public updateDetails(newDetails :PromotionDetail[]){
+    public updateDetails(newDetails: PromotionDetail[]) {
         this.details = [...newDetails];
-    } 
+    }
 
     public getId(): number | null {
         return this.id;
@@ -73,16 +73,44 @@ export class PromotionProgram {
         return this.status;
     }
 
-    public getRequiredId(){
-        if(this.id === null){
+    public getRequiredId() {
+        if (this.id === null) {
             throw new UnexpectedMissingPromotionIdError();
         }
         return this.id;
     }
 
-    public getDetails () {
+    public getDetails() {
         return [...this.details];
     }
+
+    public updateName(newName: string) {
+        this.name = newName;
+    }
+
+    public updateTime(params: {
+        startTime?: Date;
+        endTime?: Date;
+    }): void {
+        const newStart = params.startTime ?? this.startTime;
+        const newEnd = params.endTime ?? this.endTime;
+
+        if (newStart >= newEnd) {
+            throw new InvalidTimeRangeError(newStart, newEnd);
+        }
+
+        if (newStart < new Date()) {
+            throw new StartTimeInPastError(newStart);
+        }
+
+        this.startTime = newStart;
+        this.endTime = newEnd;
+    }
+
+    public updateStatus(newStatus: PromotionStatus) {
+        this.status = newStatus;
+    }
+
 }
 
 export class PromotionDetail {
@@ -173,5 +201,25 @@ export class PromotionDetail {
 
     public getVariantId(): number {
         return this.variantId;
+    }
+
+    public updatePromotionValue(value: number): void {
+        this.promotionValue = value;
+    }
+
+    public updateType(type: PromotionType): void {
+        this.type = type;
+    }
+
+    public updateProductLimit(limit: number): void {
+        this.productLimit = limit;
+    }
+
+    public updateUsageLimitPerCustomer(limit: number): void {
+        this.usageLimitPerCustomer = limit;
+    }
+
+    public updateVariant(variantId: number): void {
+        this.variantId = variantId;
     }
 }

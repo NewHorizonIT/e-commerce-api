@@ -1,4 +1,4 @@
-import { PromotionProgram } from "./domain";
+import { PromotionDetail, PromotionProgram } from "./domain";
 
 export interface IPromotionRepository {
   getAll(): Promise<PromotionProgram[]>
