@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, } from 'typeorm';
-import { PromotionStatus, PromotionStatusEnum, PromotionType } from '../domain/value_objects';
+import { PromotionStatus, PromotionStatusEnum, PromotionType, PromotionTypeEnum } from '../domain/value_objects';
 import { PromotionDetail, PromotionProgram } from '../domain/domain';
 
 @Entity('promotion_programs')
@@ -10,10 +10,10 @@ export class PromotionProgramEntity {
     @Column({ type: 'varchar', length: 255 })
     name!: string;
 
-    @Column({ type: 'datetime' })
+    @Column({ type: 'timestamp' })
     startTime!: Date;
 
-    @Column({ type: 'datetime' })
+    @Column({ type: 'timestamp' })
     endTime!: Date;
 
     @Column({
@@ -34,7 +34,7 @@ export class PromotionDetailEntity {
 
     @Column({
         type: 'enum',
-        enum: PromotionType,
+        enum: PromotionTypeEnum,
     })
     type!: PromotionType;
 
