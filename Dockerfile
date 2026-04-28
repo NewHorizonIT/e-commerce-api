@@ -57,12 +57,13 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV=production
+ENV APP_HOST=0.0.0.0
 
 # Copy package files
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy built application
 COPY --from=build /app/dist ./dist
@@ -78,7 +79,7 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
+  CMD node -e "const port = process.env.PORT || process.env.APP_PORT || 3000; require('http').get('http://localhost:' + port + '/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
 # Production command
-CMD ["node", "dist/src/app.js"]
+CMD ["sh", "-c", "export APP_PORT=${PORT:-3000}; npm start"]

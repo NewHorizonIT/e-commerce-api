@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { IAuthModulePort } from './application/module_port';
 import { AuthController } from './presentation/controller';
