@@ -41,14 +41,3 @@ export class InvalidTimeRangeError extends AppError {
     );
   }
 }
-
-export class StartTimeInPastError extends AppError {
-  constructor(startTime: Date) {
-    const now = new Date();
-    super(
-      `Invalid startTime: (${startTime.toISOString()}) must be greater than current time (${now.toISOString()}).`,
-      'PROMOTION_START_TIME_INVALID',
-      400
-    );
-  }
-}

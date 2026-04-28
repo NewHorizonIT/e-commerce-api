@@ -1,3 +1,4 @@
 export const PROMOTION_TOKENS = {
-  IPromotionRepository: 'IPromotionRepository'
+  IPromotionRepository: 'IPromotionRepository',
+  IPromotionModulePort: 'IPromotionModulePort',
 } as const;

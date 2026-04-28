@@ -5,7 +5,7 @@ import { PromotionDTOMapper } from "./mapper";
 import { PromotionProgramDTO } from "../dtos";
 
 @injectable()
-export default class GetAllPromotion {
+export default class GetAllPromotionUseCase {
   constructor(
     @inject(PROMOTION_TOKENS.IPromotionRepository)
     private readonly promotionRepository: IPromotionRepository

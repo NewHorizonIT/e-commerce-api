@@ -1,8 +1,8 @@
-import { CreatePromotionProgramDTO, PromotionDetailDTO, PromotionProgramDTO } from './dtos';
+import { CreatePromotionProgramDTO, PromotionProgramDTO, UpdatePromotionProgramDTO } from './dtos';
 
 export interface IPromotionModulePort {
     getAllPromotion(): Promise<PromotionProgramDTO[]>;
     createPromotion(promotionProgram: CreatePromotionProgramDTO): Promise<PromotionProgramDTO>;
-    updatePromotion(promotionDetail: PromotionDetailDTO[]): Promise<PromotionProgramDTO>;
-    delete(id: number): Promise<void>;
+    updatePromotion(promotionProgramDTO: UpdatePromotionProgramDTO, id: number): Promise<PromotionProgramDTO>;
+    deletePromotion(id: number): Promise<void>;
 }

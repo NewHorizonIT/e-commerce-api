@@ -1,4 +1,4 @@
-import { InvalidTimeRangeError, StartTimeInPastError, UnexpectedMissingPromotionDetailIdError, UnexpectedMissingPromotionIdError } from "./errors";
+import { InvalidTimeRangeError, UnexpectedMissingPromotionDetailIdError, UnexpectedMissingPromotionIdError } from "./errors";
 import { PromotionStatus, PromotionType } from "./value_objects";
 
 export class PromotionProgram {
@@ -97,10 +97,6 @@ export class PromotionProgram {
 
         if (newStart >= newEnd) {
             throw new InvalidTimeRangeError(newStart, newEnd);
-        }
-
-        if (newStart < new Date()) {
-            throw new StartTimeInPastError(newStart);
         }
 
         this.startTime = newStart;

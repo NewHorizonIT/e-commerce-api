@@ -25,7 +25,7 @@ export interface PromotionProgramDTO {
 }
 
 export interface PromotionDetailDTO {
-    id: number;
+    id?: number;
     type: PromotionTypeEnum;
     promotionValue: number;
     productLimit: number;

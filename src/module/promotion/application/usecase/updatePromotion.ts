@@ -8,7 +8,7 @@ import { PromotionDetail } from "../../domain/domain";
 import { PromotionDTOMapper } from "./mapper";
 
 @injectable()
-export default class UpdatePromotion {
+export default class UpdatePromotionUseCase {
   constructor(
     @inject(PROMOTION_TOKENS.IPromotionRepository)
     private readonly promotionRepository: IPromotionRepository
