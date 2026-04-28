@@ -1,8 +1,8 @@
 import 'reflect-metadata';
-import { config, databaseConnection, redisClient } from './src/config';
-import { appLogger } from './src/shared/logging/appLogger';
-import { ErrorLogger } from './src/shared/logging/errorLogger';
-import { initContainer } from './src/shared/container';
+import { config, databaseConnection, redisClient } from './src/config/index.js';
+import { appLogger } from './src/shared/logging/appLogger.js';
+import { ErrorLogger } from './src/shared/logging/errorLogger.js';
+import { initContainer } from './src/shared/container/index.js';
 
 async function bootstrap(): Promise<void> {
   try {

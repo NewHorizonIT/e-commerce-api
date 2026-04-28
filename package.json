@@ -2,7 +2,7 @@
   "name": "e-commerce-api",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "dev": "tsx watch server.ts",
     "build": "tsc && tsc-alias",

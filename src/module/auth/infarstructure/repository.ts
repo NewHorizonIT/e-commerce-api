@@ -24,9 +24,9 @@ import { AccountEntity, AccountMapper } from './accountEntity';
 
 @injectable()
 export class TypeORMAccountRepository implements IAccountRepository {
-  constructor(
-    private readonly repo: Repository<AccountEntity> = AppDataSource.getRepository(AccountEntity)
-  ) {}
+  private get repo(): Repository<AccountEntity> {
+    return AppDataSource.getRepository(AccountEntity);
+  }
 
   async save(account: Account): Promise<Account> {
     const entity = AccountMapper.toEntity(account);
