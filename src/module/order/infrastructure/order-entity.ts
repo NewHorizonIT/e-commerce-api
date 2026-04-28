@@ -39,7 +39,12 @@ export class OrderEntity {
 
   @Column({
     type: 'enum',
-    enum: [PAYMENT_METHOD_VALUE.CASH_ON_DELIVERY, PAYMENT_METHOD_VALUE.BANK_TRANSFER],
+    enum: [
+      PAYMENT_METHOD_VALUE.CASH_ON_DELIVERY,
+      PAYMENT_METHOD_VALUE.VNPAY_WALLET,
+      PAYMENT_METHOD_VALUE.MOMO_WALLET,
+      PAYMENT_METHOD_VALUE.ZALOPAY_WALLET,
+    ],
     name: 'payment_method',
   })
   paymentMethod!: string;

@@ -6,9 +6,9 @@ export interface PaginationQueryDTO {
 }
 
 export interface OrderListQueryDTO extends PaginationQueryDTO {
-  accountId?: string;
-  shippingInfoId?: string;
-  discountCodeId?: string;
+  accountId?: number;
+  shippingInfoId?: number;
+  discountCodeId?: number;
   status?: OrderStatus;
   sortBy?: 'orderDate' | 'totalAmount';
   sortOrder?: 'asc' | 'desc';
@@ -67,7 +67,7 @@ export interface OrderDetailDTO {
 }
 
 export interface PaginatedOrdersDTO {
-  items: OrderSummaryDTO[];
+  items: OrderDetailDTO[];
   page: number;
   limit: number;
   totalItems: number;
@@ -82,7 +82,6 @@ export interface CreateOrderDTO {
   accountId: number;
   shippingInfoId: number;
   discountCodeId?: number;
-
   items: {
     variantId: number;
     quantity: number;

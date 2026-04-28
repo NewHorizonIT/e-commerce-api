@@ -24,16 +24,17 @@ export class OrderController {
     new SuccessResponse(order, 'Order created successfully', StatusCode.CREATED).send(res);
   }
 
-  async updateOrderPayment(req: Request, res: Response): Promise<void> {
-    const { orderId } = req.params as { orderId: string };
-    const order = await this.orderModulePort.updateOrderPayment(Number(orderId), req.body);
-    new SuccessResponse(order, 'Order payment updated', StatusCode.OK).send(res);
-  }
-
+  
   async updateOrderStatus(req: Request, res: Response): Promise<void> {
     const { orderId } = req.params as { orderId: string };
     const order = await this.orderModulePort.updateOrderStatus(Number(orderId), req.body);
     new SuccessResponse(order, 'Order status updated', StatusCode.OK).send(res);
+  }
+  
+  async updateOrderPayment(req: Request, res: Response): Promise<void> {
+    const { orderId } = req.params as { orderId: string };
+    const order = await this.orderModulePort.updateOrderPayment(Number(orderId), req.body);
+    new SuccessResponse(order, 'Order payment updated', StatusCode.OK).send(res);
   }
 
   async hasOrdersByAccount(req: Request, res: Response): Promise<void> {

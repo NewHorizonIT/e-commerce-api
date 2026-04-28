@@ -52,17 +52,13 @@ export class Order {
     note?: string;
     accountId: number;
     shippingInfoId: number;
-    discountCodeId: number;
+    discountCodeId?: number | null;
     items: OrderItem[];
   }): Order {
     if (params.paymentMethod === null) {
       throw new MissingPaymentMethodError();
     }
-    if (
-      ![PAYMENT_METHOD_VALUE.CASH_ON_DELIVERY, PAYMENT_METHOD_VALUE.BANK_TRANSFER].includes(
-        params.paymentMethod
-      )
-    ) {
+    if (!Object.values(PAYMENT_METHOD_VALUE).includes(params.paymentMethod)) {
       throw new InvalidPaymentMethodError();
     }
     if (params.accountId === null) {
@@ -76,12 +72,6 @@ export class Order {
     }
     if (isNaN(params.shippingInfoId) || typeof params.shippingInfoId !== 'number') {
       throw new InvalidShippingInfoIdError();
-    }
-    if (params.discountCodeId === null) {
-      throw new MissingDiscountCodeIdError();
-    }
-    if (isNaN(params.discountCodeId) || typeof params.discountCodeId !== 'number') {
-      throw new InvalidDiscountCodeIdError();
     }
 
     const order = new Order(
@@ -99,7 +89,7 @@ export class Order {
       params.note?.trim() || null,
       params.accountId,
       params.shippingInfoId,
-      params.discountCodeId,
+      params.discountCodeId ?? null,
       [],
       []
     );
@@ -178,7 +168,11 @@ export class Order {
   }
 
   changeStatus(newStatus: OrderStatus, note?: string) {
-    if (!this.canTransition(this.status, newStatus)) {
+    if (
+      this.status !== ORDER_STATUS_VALUE.PENDING &&
+      newStatus !== ORDER_STATUS_VALUE.PENDING &&
+      !this.canTransition(this.status, newStatus)
+    ) {
       throw new InvalidStatusError();
     }
 
@@ -199,7 +193,11 @@ export class Order {
       throw new BadRequestError('Already paid');
     }
 
-    if (this.paymentMethod === PAYMENT_METHOD_VALUE.BANK_TRANSFER) {
+    if (
+      this.paymentMethod === PAYMENT_METHOD_VALUE.VNPAY_WALLET ||
+      this.paymentMethod === PAYMENT_METHOD_VALUE.MOMO_WALLET ||
+      this.paymentMethod === PAYMENT_METHOD_VALUE.ZALOPAY_WALLET
+    ) {
       if (!params?.transactionCode) {
         throw new MissingBankTransferTransactionCodeError();
       }
