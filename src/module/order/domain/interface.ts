@@ -12,8 +12,8 @@ export interface IOrderRepository {
   findOrderById(orderId: number): Promise<OrderDetailDTO | null>;
 
   createOrder(dto: CreateOrderDTO): Promise<OrderDetailDTO>;
-  updateOrderPayment(orderId: number, dto: UpdateOrderPaymentDTO): Promise<boolean>;
   updateOrderStatus(orderId: number, dto: UpdateOrderStatusDTO): Promise<OrderDetailDTO | null>;
+  updateOrderPayment(orderId: number, dto: UpdateOrderPaymentDTO): Promise<OrderDetailDTO | null>;
 
   hasOrdersByAccountId(accountId: number): Promise<boolean>;
   hasOrdersByShippingInfoId(shippingInfoId: number): Promise<boolean>;

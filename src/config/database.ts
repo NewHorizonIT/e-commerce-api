@@ -17,6 +17,7 @@ import {
   OrderItemEntity,
   OrderStatusHistoryEntity,
 } from '@/module/order/infrastructure/order-entity';
+import { DiscountCodeEntity } from '@/module/discount/infrastructure/discount-entity';
 import { CartEntity, CartItemDetailEntity } from '@/module/cart/infrastructure/cartEntity';
 
 // TypeORM DataSource Options
@@ -41,6 +42,7 @@ const dataSourceOptions: DataSourceOptions = {
     VariantGroupEntity,
     VariantValueEntity,
     VariantDetailEntity,
+    DiscountCodeEntity,
     OrderEntity,
     OrderItemEntity,
     OrderStatusHistoryEntity,

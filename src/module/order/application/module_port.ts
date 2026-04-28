@@ -17,5 +17,5 @@ export interface IOrderModulePort {
 
   hasOrdersByAccountId(accountId: number): Promise<boolean>;
   hasOrdersByShippingInfoId(shippingInfoId: number): Promise<boolean>;
-  hasOrdersByDiscountCodeId(discountCodeId: number): Promise<boolean>;
+  hasOrdersByDiscountCodeId(discountCoded: number): Promise<boolean>;
 }
