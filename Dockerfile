@@ -67,6 +67,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy built application
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/docs ./docs
 
 # Change ownership
 RUN chown -R ecommerce:nodejs /app
