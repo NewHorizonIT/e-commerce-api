@@ -14,7 +14,6 @@ export function loadEnvFile(): void {
   for (const envFile of envFiles) {
     const envPath = path.resolve(rootDir, envFile);
     const result = dotenv.config({ path: envPath });
-
     if (!result.error) {
       console.log(`Loaded env from: ${envFile}`);
     }

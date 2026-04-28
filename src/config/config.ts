@@ -5,10 +5,13 @@ import {
   getEnvNumber,
   isDevelopment,
   isProduction,
+  loadEnvFile,
   NodeEnv,
 } from './env';
 
 // DEFINE CONFIG
+
+loadEnvFile();
 
 interface AppConfig {
   name: string;

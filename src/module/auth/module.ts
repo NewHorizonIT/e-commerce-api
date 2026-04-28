@@ -1,21 +1,20 @@
-// Initialize module and wire adapter, port, and router together
-/*
-  Example:
-  class <NameModule> {
-    public router: Router;
+import { container } from 'tsyringe';
+import { IAuthModulePort } from './application/module_port';
+import { AuthController } from './presentation/controller';
+import { createAuthRouter } from './presentation/router';
+import { AUTH_TOKENS } from './tokens';
+import './container';
 
-    constructor(
-      private <name>Adapter: I<Name>Port,
-    ) {
-      this.router = this.createRouter();
-    }
+export class AuthModule {
+  public readonly router;
+  public readonly publicApi: IAuthModulePort;
 
-    private createRouter(): Router {
-      const router = Router();
-
-      // Define routes and handlers here
-
-      return router;
-    }
+  constructor() {
+    this.publicApi = container.resolve<IAuthModulePort>(AUTH_TOKENS.IAuthModulePort);
+    const controller = container.resolve(AuthController);
+    this.router = createAuthRouter(controller);
   }
-*/
+}
+
+export const authModule = new AuthModule();
+export const authPublicApi = authModule.publicApi;

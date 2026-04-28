@@ -1,21 +1,44 @@
-import { corsMiddleware } from '@/presentation/http/middleware/cors';
-import { rateLimitMiddleware } from '@/presentation/http/middleware/rateLimit';
 import { config } from '@config/config';
-import { loadEnvFile } from '@config/env';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import express from 'express';
-
-// Load environment variables đầu tiên
-loadEnvFile();
+import swaggerUi from 'swagger-ui-express';
+import { authModule } from './module/auth/module';
+import { productModule } from './module/product/module';
+import { reviewModule } from './module/review/module';
+import errorHandler from './shared/middleware/errorHandler';
+import notFoundHandler from './shared/middleware/notFoundHandler';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import { swaggerSpec, swaggerYamlText } from './config/swagger';
+import { orderModule } from './module/order/module';
+import { discountModule } from './module/discount/module';
+// import { paymentModule } from './module/payment/module';
+import vnpayRouter from './module/payment2/routers/vnpay';
+import codRouter from './module/payment2/routers/cod';
+import momoRouter from './module/payment2/routers/momo';
+import zalopayRouter from './module/payment2/routers/zalopay';
+import { cartModule } from './module/cart/module';
+import { userModule } from './module/user/module';
 
 const app = express();
-const port = config.app.port;
 
 // ==================== MIDDLEWARES ====================
-app.use(corsMiddleware());
-app.use(rateLimitMiddleware());
-
+app.use(
+  cors({
+    origin: config.cors.origins,
+    methods: config.cors.methods,
+    allowedHeaders: config.cors.allowedHeaders,
+    credentials: config.cors.credentials,
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
+app.use(compression());
+app.use(helmet());
+app.use(morgan('dev'));
 
 // ==================== ROUTES ====================
 app.get('/', (req, res) => {
@@ -26,12 +49,25 @@ app.get('/health', (req, res) => {
   res.json({ status: 'healthy', uptime: process.uptime() });
 });
 
-// ==================== START SERVER ====================
-app.listen(port, () => {
-  console.log('========================================');
-  console.log('      E-COMMERCE API SERVER STARTED     ');
-  console.log('========================================');
-  console.log(`Environment: ${config.app.env}`);
-  console.log(`Server is running on http://${config.app.host}:${port}`);
-  console.log('========================================');
+app.get('/api-docs.yaml', (_req, res) => {
+  res.type('application/yaml').send(swaggerYamlText);
 });
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/auth`, authModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, productModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, discountModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/orders`, orderModule.router);
+// app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, paymentModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, codRouter);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, vnpayRouter);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, momoRouter);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, zalopayRouter);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, reviewModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, cartModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, userModule.router);
+
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+export default app;
