@@ -10,6 +10,7 @@
     "seed:product": "tsx scripts/seed-product.ts",
     "seed:discount": "tsx scripts/seed-discount.ts",
     "seed:order": "tsx scripts/seed-order.ts",
+    "seed:cart": "tsx scripts/seed-cart.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

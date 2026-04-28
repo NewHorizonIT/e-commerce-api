@@ -6,6 +6,7 @@ import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { authModule } from './module/auth/module';
 import { productModule } from './module/product/module';
+import { reviewModule } from './module/review/module';
 import errorHandler from './shared/middleware/errorHandler';
 import notFoundHandler from './shared/middleware/notFoundHandler';
 import helmet from 'helmet';
@@ -18,6 +19,7 @@ import vnpayRouter from './module/payment2/routers/vnpay';
 import codRouter from './module/payment2/routers/cod';
 import momoRouter from './module/payment2/routers/momo';
 import zalopayRouter from './module/payment2/routers/zalopay';
+import { cartModule } from './module/cart/module';
 
 const app = express();
 
@@ -60,6 +62,8 @@ app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, codRouter);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, vnpayRouter);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, momoRouter);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, zalopayRouter);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, reviewModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, cartModule.router);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
