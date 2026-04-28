@@ -19,6 +19,10 @@ import {
 } from '@/module/order/infrastructure/order-entity';
 import { DiscountCodeEntity } from '@/module/discount/infrastructure/discount-entity';
 import { CartEntity, CartItemDetailEntity } from '@/module/cart/infrastructure/cartEntity';
+import {
+  PersonalInformationEntity,
+  ShippingAddressEntity,
+} from '@/module/user/infrastructure/userEntity';
 
 // TypeORM DataSource Options
 const dataSourceOptions: DataSourceOptions = {
@@ -49,6 +53,8 @@ const dataSourceOptions: DataSourceOptions = {
     ReviewEntity,
     CartItemDetailEntity,
     CartEntity,
+    PersonalInformationEntity,
+    ShippingAddressEntity,
   ],
   migrations: ['src/shared/infrastructure/database/migrations/**/*.{ts,js}'],
   subscribers: ['src/shared/infrastructure/database/subscribers/**/*.{ts,js}'],

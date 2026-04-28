@@ -21,6 +21,8 @@ tags:
     description: Admin order management APIs
   - name: Cart
     description: Cart management APIs
+  - name: User
+    description: Current user profile and address management APIs
 
 paths:
   /auth/accounts:
@@ -126,6 +128,131 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /users/me:
+    get:
+      tags: [User]
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserProfile'
+
+  /users/me/personal-information:
+    put:
+      tags: [User]
+      summary: Upsert current user personal information
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertPersonalInformationRequest'
+      responses:
+        '200':
+          description: Personal information saved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PersonalInformation'
+
+  /users/me/addresses:
+    get:
+      tags: [User]
+      summary: List current user shipping addresses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Shipping address list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ShippingAddress'
+    post:
+      tags: [User]
+      summary: Create shipping address
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShippingAddressRequest'
+      responses:
+        '201':
+          description: Shipping address created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ShippingAddress'
+
+  /users/me/addresses/{addressId}:
+    patch:
+      tags: [User]
+      summary: Update shipping address
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AddressId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateShippingAddressRequest'
+      responses:
+        '200':
+          description: Shipping address updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ShippingAddress'
+    delete:
+      tags: [User]
+      summary: Delete shipping address
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AddressId'
+      responses:
+        '204':
+          description: Shipping address deleted
 
   /products:
     get:
@@ -1005,6 +1132,13 @@ components:
       schema:
         type: integer
         minimum: 1
+    AddressId:
+      name: addressId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
 
   schemas:
     SuccessEnvelope:
@@ -1103,6 +1237,121 @@ components:
           type: string
         accessToken:
           type: string
+
+    PersonalInformation:
+      type: object
+      properties:
+        id:
+          type: integer
+        accountId:
+          type: integer
+        name:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+        gender:
+          type: boolean
+          nullable: true
+        birth:
+          type: string
+          format: date
+          nullable: true
+
+    ShippingAddress:
+      type: object
+      properties:
+        id:
+          type: integer
+        accountId:
+          type: integer
+        isDefault:
+          type: boolean
+        streetAddress:
+          type: string
+        ward:
+          type: string
+        province:
+          type: string
+        receiverName:
+          type: string
+        receiverPhone:
+          type: string
+
+    UserProfile:
+      type: object
+      properties:
+        accountId:
+          type: integer
+        personalInformation:
+          nullable: true
+          $ref: '#/components/schemas/PersonalInformation'
+        shippingAddresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShippingAddress'
+
+    UpsertPersonalInformationRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        avatarUrl:
+          type: string
+          maxLength: 255
+          nullable: true
+        gender:
+          type: boolean
+          nullable: true
+        birth:
+          type: string
+          format: date
+          nullable: true
+
+    CreateShippingAddressRequest:
+      type: object
+      required: [streetAddress, ward, province, receiverName, receiverPhone]
+      properties:
+        isDefault:
+          type: boolean
+        streetAddress:
+          type: string
+          maxLength: 255
+        ward:
+          type: string
+          maxLength: 255
+        province:
+          type: string
+          maxLength: 255
+        receiverName:
+          type: string
+          maxLength: 255
+        receiverPhone:
+          type: string
+          pattern: '^\\d{10,15}$'
+
+    UpdateShippingAddressRequest:
+      type: object
+      properties:
+        isDefault:
+          type: boolean
+        streetAddress:
+          type: string
+          maxLength: 255
+        ward:
+          type: string
+          maxLength: 255
+        province:
+          type: string
+          maxLength: 255
+        receiverName:
+          type: string
+          maxLength: 255
+        receiverPhone:
+          type: string
+          pattern: '^\\d{10,15}$'
 
     Category:
       type: object

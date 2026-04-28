@@ -20,6 +20,7 @@ import codRouter from './module/payment2/routers/cod';
 import momoRouter from './module/payment2/routers/momo';
 import zalopayRouter from './module/payment2/routers/zalopay';
 import { cartModule } from './module/cart/module';
+import { userModule } from './module/user/module';
 
 const app = express();
 
@@ -56,7 +57,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/auth`, authModule.router);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, productModule.router);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, discountModule.router);
-app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, orderModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/orders`, orderModule.router);
 // app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, paymentModule.router);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, codRouter);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, vnpayRouter);
@@ -64,6 +65,7 @@ app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, momoRouter);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, zalopayRouter);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, reviewModule.router);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, cartModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, userModule.router);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
