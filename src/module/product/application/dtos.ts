@@ -21,6 +21,9 @@ export interface ProductSummaryDTO {
   totalSold: number;
   hasVariant: boolean;
   isHidden: boolean;
+  thumbnailUrl: string | null;
+  averageRating: number;
+  totalReviews: number;
   minPrice: number | null;
   maxPrice: number | null;
   category: {

@@ -1592,6 +1592,14 @@ components:
           type: boolean
         isHidden:
           type: boolean
+        thumbnailUrl:
+          type: string
+          nullable: true
+        averageRating:
+          type: number
+          format: float
+        totalReviews:
+          type: integer
         minPrice:
           type: number
           nullable: true
