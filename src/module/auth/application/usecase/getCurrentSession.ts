@@ -21,6 +21,7 @@ export default class GetCurrentSessionUseCase {
     const response: AuthSessionInfoDTO = {
       id: account.getId()!,
       phoneNum: account.getPhoneNum().value,
+      role: account.getRole(),
     };
 
     return response;

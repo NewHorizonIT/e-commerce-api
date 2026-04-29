@@ -48,7 +48,7 @@ async function seedOrder(): Promise<void> {
      * PREPARE DATA
      */
     const account = await accountRepo.findOne({
-      where: { phoneNum: '0912345678' },
+      where: { phoneNum: '0286257634' },
     });
     if (!account) throw new Error('Seed account not found');
 
@@ -69,11 +69,66 @@ async function seedOrder(): Promise<void> {
     const randomItem = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
     /**
-     * CREATE MULTIPLE ORDERS
+     * CREATE ORDERS WITH DIFFERENT STATES
      */
-    const ordersToCreate = 5;
+    const orderStates = [
+      {
+        name: 'Pending Order',
+        status: ORDER_STATUS_VALUE.PENDING,
+        statusHistory: [
+          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
+        ],
+      },
+      {
+        name: 'Confirmed Order',
+        status: ORDER_STATUS_VALUE.CONFIRMED,
+        statusHistory: [
+          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
+          { oldStatus: ORDER_STATUS_VALUE.PENDING, newStatus: ORDER_STATUS_VALUE.CONFIRMED, note: 'Order confirmed' },
+        ],
+      },
+      {
+        name: 'Shipping Order',
+        status: ORDER_STATUS_VALUE.SHIPPING,
+        statusHistory: [
+          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
+          { oldStatus: ORDER_STATUS_VALUE.PENDING, newStatus: ORDER_STATUS_VALUE.CONFIRMED, note: 'Order confirmed' },
+          { oldStatus: ORDER_STATUS_VALUE.CONFIRMED, newStatus: ORDER_STATUS_VALUE.SHIPPING, note: 'Order shipped' },
+        ],
+      },
+      {
+        name: 'Delivered Order',
+        status: ORDER_STATUS_VALUE.DELIVERED,
+        statusHistory: [
+          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
+          { oldStatus: ORDER_STATUS_VALUE.PENDING, newStatus: ORDER_STATUS_VALUE.CONFIRMED, note: 'Order confirmed' },
+          { oldStatus: ORDER_STATUS_VALUE.CONFIRMED, newStatus: ORDER_STATUS_VALUE.SHIPPING, note: 'Order shipped' },
+          { oldStatus: ORDER_STATUS_VALUE.SHIPPING, newStatus: ORDER_STATUS_VALUE.DELIVERED, note: 'Order delivered' },
+        ],
+      },
+      {
+        name: 'Reviewed Order',
+        status: ORDER_STATUS_VALUE.REVIEWED,
+        statusHistory: [
+          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
+          { oldStatus: ORDER_STATUS_VALUE.PENDING, newStatus: ORDER_STATUS_VALUE.CONFIRMED, note: 'Order confirmed' },
+          { oldStatus: ORDER_STATUS_VALUE.CONFIRMED, newStatus: ORDER_STATUS_VALUE.SHIPPING, note: 'Order shipped' },
+          { oldStatus: ORDER_STATUS_VALUE.SHIPPING, newStatus: ORDER_STATUS_VALUE.DELIVERED, note: 'Order delivered' },
+          { oldStatus: ORDER_STATUS_VALUE.DELIVERED, newStatus: ORDER_STATUS_VALUE.REVIEWED, note: 'Customer reviewed' },
+        ],
+      },
+      {
+        name: 'Cancelled Order',
+        status: ORDER_STATUS_VALUE.CANCELLED,
+        statusHistory: [
+          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
+          { oldStatus: ORDER_STATUS_VALUE.PENDING, newStatus: ORDER_STATUS_VALUE.CANCELLED, note: 'Order cancelled by customer' },
+        ],
+      },
+    ];
 
-    for (let i = 0; i < ordersToCreate; i++) {
+    for (let i = 0; i < orderStates.length; i++) {
+      const orderState = orderStates[i];
       const selectedVariants = [randomItem(variants), randomItem(variants)];
 
       let totalProductAmount = 0;
@@ -123,20 +178,20 @@ async function seedOrder(): Promise<void> {
        */
       const order = await orderRepo.save(
         orderRepo.create({
-          status: ORDER_STATUS_VALUE.PENDING,
-          orderDate: new Date(),
+          status: orderState.status,
+          orderDate: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
           totalProductAmount,
           shippingFee,
           discountAmount,
           totalAmount: finalTotal,
-          isPaid: Math.random() > 0.5,
+          isPaid: orderState.status !== ORDER_STATUS_VALUE.CANCELLED ? Math.random() > 0.3 : false,
           paymentMethod: randomItem([
             PAYMENT_METHOD_VALUE.CASH_ON_DELIVERY,
             PAYMENT_METHOD_VALUE.VNPAY_WALLET,
             PAYMENT_METHOD_VALUE.MOMO_WALLET,
             PAYMENT_METHOD_VALUE.ZALOPAY_WALLET,
           ]),
-          note: `Seed order #${i + 1}`,
+          note: `Seed ${orderState.name} #${i + 1}`,
           accountId: account.id,
           shippingInfoId: 1,
           discountCodeId,
@@ -167,44 +222,24 @@ async function seedOrder(): Promise<void> {
       /**
        * CREATE STATUS HISTORY
        */
-      const histories = [
-        {
-          oldStatus: 'pending' as OrderStatus,
-          newStatus: 'pending' as OrderStatus,
-          note: 'Order created',
-        },
-      ];
+      await orderHistoryRepo.save(
+        orderState.statusHistory.map((h, index) =>
+          orderHistoryRepo.create({
+            orderId: order.id,
+            oldStatus: h.oldStatus,
+            newStatus: h.newStatus,
+            note: h.note,
+            changedAt: new Date(Date.now() - (orderState.statusHistory.length - index) * 60 * 60 * 1000),
+          })
+        )
+      );
 
-      if (Math.random() > 0.5) {
-        histories.push({
-          oldStatus: ORDER_STATUS_VALUE.PENDING,
-          newStatus: ORDER_STATUS_VALUE.CONFIRMED,
-          note: 'Order confirmed',
-        });
-      }
-
-      if (Math.random() > 0.7) {
-        histories.push({
-          oldStatus: ORDER_STATUS_VALUE.CONFIRMED,
-          newStatus: ORDER_STATUS_VALUE.SHIPPING,
-          note: 'Order shipped',
-        });
-      }
-
-      // await orderHistoryRepo.save(
-      //   histories.map((h) =>
-      //     orderHistoryRepo.create({
-      //       orderId: order.id,
-      //       oldStatus: h.oldStatus,
-      //       newStatus: h.newStatus,
-      //       note: h.note,
-      //       changedAt: new Date(),
-      //     })
-      //   )
-      // );
+      console.log(`✅ Created ${orderState.name}`);
     }
 
-    console.log('✅ Seed orders completed!');
+    console.log('='.repeat(50));
+    console.log(`✅ Seed orders completed! (${orderStates.length} orders with different states)`);
+    console.log('='.repeat(50));
   } finally {
     await AppDataSource.destroy();
   }

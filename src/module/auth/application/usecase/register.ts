@@ -31,7 +31,7 @@ export default class RegisterUseCase {
     Account.ensurePasswordStrength(dto.password);
 
     const passwordHash = await hashPassword(dto.password);
-    const newAccount = Account.create({ phoneNum, passwordHash });
+    const newAccount = Account.create({ phoneNum, passwordHash, role: dto.role });
     const savedAccount = await this.accountRepository.save(newAccount);
     const accountId = savedAccount.getId();
 
@@ -39,7 +39,11 @@ export default class RegisterUseCase {
       throw new InternalServerError('Failed to create account');
     }
 
-    const { accessToken, refreshToken } = generatePairJwtTokens({ id: accountId });
+    const { accessToken, refreshToken } = generatePairJwtTokens({
+      id: accountId,
+      phoneNum: savedAccount.getPhoneNum().value,
+      role: savedAccount.getRole(),
+    });
     await this.refreshTokenStore.save(accountId, refreshToken);
 
     appLogger.info('Auth register success', {
@@ -52,6 +56,7 @@ export default class RegisterUseCase {
       phoneNum: savedAccount.getPhoneNum().value,
       accessToken,
       refreshToken,
+      role: savedAccount.getRole(),
     };
   }
 }

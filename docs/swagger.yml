@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: E-Commerce API
   version: 1.0.0
-  description: API documentation synchronized with currently implemented Auth and Product modules.
+  description: API documentation synchronized with the current Auth, Product, Order, Discount, and User modules.
 
 servers:
   - url: http://localhost:4444/api/v1
@@ -16,15 +16,17 @@ tags:
   - name: Product Public
     description: Public product browsing APIs
   - name: Product Admin
-    description: Product management APIs (requires access token)
+    description: Product management APIs (requires admin role)
   - name: Order Public
     description: Public order browsing APIs
   - name: Order Admin
-    description: Admin order management APIs
+    description: Admin order management APIs (requires admin role)
   - name: Cart
     description: Cart management APIs
   - name: User
     description: Current user profile and address management APIs
+  - name: Payment
+    description: Payment initiation and gateway callback APIs
 
 paths:
   /auth/accounts:
@@ -107,7 +109,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthStatusEnvelope'
+                $ref: '#/components/schemas/AuthSessionInfoEnvelope'
         '401':
           description: Unauthorized
           content:
@@ -973,6 +975,184 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/Cart'
+
+  /payment/cod:
+    post:
+      tags: [Payment]
+      summary: Mark COD order as paid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiatePaymentRequest'
+      responses:
+        '200':
+          description: COD payment confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodPaymentResponse'
+        '400':
+          description: Invalid request or order state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payment/vnpay/initiate:
+    post:
+      tags: [Payment]
+      summary: Create VNPay payment URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiatePaymentRequest'
+      responses:
+        '200':
+          description: VNPay payment URL generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VnpayInitiateResponse'
+        '400':
+          description: Invalid request or order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payment/vnpay/callback:
+    get:
+      tags: [Payment]
+      summary: VNPay return callback
+      parameters:
+        - name: vnp_ResponseCode
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: vnp_TxnRef
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: VNPay callback result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayCallbackResponse'
+        '400':
+          description: Payment verification failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payment/momo/initiate:
+    post:
+      tags: [Payment]
+      summary: Create MoMo payment request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiatePaymentRequest'
+      responses:
+        '200':
+          description: MoMo payment request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MomoInitiateResponse'
+        '400':
+          description: Invalid request or order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payment/momo/callback:
+    get:
+      tags: [Payment]
+      summary: MoMo redirect callback
+      parameters:
+        - name: resultCode
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: orderId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: MoMo callback result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayCallbackResponse'
+        '400':
+          description: Payment verification failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payment/zalopay/initiate:
+    post:
+      tags: [Payment]
+      summary: Create ZaloPay payment request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiatePaymentRequest'
+      responses:
+        '200':
+          description: ZaloPay payment request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZalopayInitiateResponse'
+        '400':
+          description: Invalid request or order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payment/zalopay/callback:
+    post:
+      tags: [Payment]
+      summary: ZaloPay callback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ZalopayCallbackRequest'
+      responses:
+        '200':
+          description: ZaloPay callback result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayCallbackResponse'
+        '400':
+          description: Payment verification failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags: [Cart]
       summary: Update cart item quantity
@@ -1176,6 +1356,19 @@ components:
         data:
           $ref: '#/components/schemas/AuthData'
 
+    AuthSessionInfoEnvelope:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/AuthSessionInfoData'
+
+    AccountRole:
+      type: string
+      enum: [admin, user]
+
     ErrorResponse:
       type: object
       properties:
@@ -1225,6 +1418,8 @@ components:
           type: integer
         phoneNum:
           type: string
+        role:
+          $ref: '#/components/schemas/AccountRole'
         accessToken:
           type: string
         refreshToken:
@@ -1237,8 +1432,20 @@ components:
           type: integer
         phoneNum:
           type: string
+        role:
+          $ref: '#/components/schemas/AccountRole'
         accessToken:
           type: string
+
+    AuthSessionInfoData:
+      type: object
+      properties:
+        id:
+          type: integer
+        phoneNum:
+          type: string
+        role:
+          $ref: '#/components/schemas/AccountRole'
 
     PersonalInformation:
       type: object
@@ -1387,6 +1594,14 @@ components:
           type: boolean
         isHidden:
           type: boolean
+        thumbnailUrl:
+          type: string
+          nullable: true
+        averageRating:
+          type: number
+          format: float
+        totalReviews:
+          type: integer
         minPrice:
           type: number
           nullable: true
@@ -1825,6 +2040,98 @@ components:
       properties:
         quantity:
           $ref: '#/components/schemas/CartItemQuantity'
+
+    InitiatePaymentRequest:
+      type: object
+      required: [orderId]
+      properties:
+        orderId:
+          type: integer
+          minimum: 1
+
+    CodPaymentResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            orderUpdated:
+              type: object
+              nullable: true
+
+    VnpayInitiateResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            paymentUrl:
+              type: string
+              format: uri
+
+    MomoInitiateResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+
+    ZalopayInitiateResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            orderUrl:
+              type: string
+              nullable: true
+            raw:
+              type: object
+              additionalProperties: true
+
+    ZalopayCallbackRequest:
+      type: object
+      required: [data, mac]
+      properties:
+        data:
+          type: string
+          description: JSON string payload from ZaloPay
+        mac:
+          type: string
+
+    GatewayCallbackResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        statusCode:
+          type: integer
+          example: 200
+        message:
+          type: string
+        data:
+          nullable: true
 
     CartItemDetail:
       type: object

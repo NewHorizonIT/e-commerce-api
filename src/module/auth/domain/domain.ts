@@ -30,11 +30,23 @@ class Account {
     private phoneNum: PhoneNumber,
     private password: string,
     private createdDate: Date | null,
-    private isLocked: boolean
+    private isLocked: boolean,
+    private role: 'admin' | 'user'
   ) {}
 
-  public static create(params: { phoneNum: PhoneNumber; passwordHash: string }): Account {
-    return new Account(null, params.phoneNum, params.passwordHash, null, false);
+  public static create(params: {
+    phoneNum: PhoneNumber;
+    passwordHash: string;
+    role?: 'admin' | 'user';
+  }): Account {
+    return new Account(
+      null,
+      params.phoneNum,
+      params.passwordHash,
+      null,
+      false,
+      params.role ?? 'user'
+    );
   }
 
   public static rehydrate(params: {
@@ -43,13 +55,15 @@ class Account {
     passwordHash: string;
     createdDate: Date;
     isLocked: boolean;
+    role: 'admin' | 'user';
   }): Account {
     return new Account(
       params.id,
       params.phoneNum,
       params.passwordHash,
       params.createdDate,
-      params.isLocked
+      params.isLocked,
+      params.role
     );
   }
 
@@ -82,6 +96,9 @@ class Account {
   }
   public getIsLocked(): boolean {
     return this.isLocked;
+  }
+  public getRole(): 'admin' | 'user' {
+    return this.role;
   }
 }
 

@@ -58,7 +58,18 @@ export class TypeORMProductRepository implements IProductRepository {
       .createQueryBuilder('p')
       .leftJoin('p.variants', 'v')
       .leftJoin('p.category', 'c')
-      .leftJoin('p.productType', 'pt');
+      .leftJoin('p.productType', 'pt')
+      .leftJoin(
+        (subQuery) =>
+          subQuery
+            .select('r.product_id', 'product_id')
+            .addSelect('ROUND(AVG(r.rating)::numeric, 2)', 'average_rating')
+            .addSelect('COUNT(*)', 'total_reviews')
+            .from('reviews', 'r')
+            .groupBy('r.product_id'),
+        'rv',
+        'rv.product_id = p.id'
+      );
 
     if (!includeHidden) {
       qb.andWhere('p.is_hidden = :isHidden', { isHidden: false });
@@ -97,12 +108,17 @@ export class TypeORMProductRepository implements IProductRepository {
       'c.name AS c_name',
       'pt.id AS pt_id',
       'pt.name AS pt_name',
+      'COALESCE(MAX(CASE WHEN v.is_default = true THEN v.image_url END), MIN(v.image_url)) AS thumbnail_url',
+      'COALESCE(rv.average_rating, 0) AS average_rating',
+      'COALESCE(rv.total_reviews, 0) AS total_reviews',
       'MIN(v.price) AS min_price',
       'MAX(v.price) AS max_price',
     ])
       .groupBy('p.id')
       .addGroupBy('c.id')
-      .addGroupBy('pt.id');
+      .addGroupBy('pt.id')
+      .addGroupBy('rv.average_rating')
+      .addGroupBy('rv.total_reviews');
 
     if (query.sortBy === 'price') {
       qb.orderBy('MIN(v.price)', query.sortOrder?.toUpperCase() as 'ASC' | 'DESC');
@@ -147,6 +163,9 @@ export class TypeORMProductRepository implements IProductRepository {
       totalSold: Number(row.p_total_sold),
       hasVariant: Boolean(row.p_has_variant),
       isHidden: Boolean(row.p_is_hidden),
+      thumbnailUrl: row.thumbnail_url ?? null,
+      averageRating: Number(row.average_rating ?? 0),
+      totalReviews: Number(row.total_reviews ?? 0),
       minPrice: row.min_price !== null ? Number(row.min_price) : null,
       maxPrice: row.max_price !== null ? Number(row.max_price) : null,
       category: {

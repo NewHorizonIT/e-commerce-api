@@ -29,11 +29,13 @@ export class AuthController {
     id: number;
     phoneNum: string;
     accessToken: string;
+    role: 'admin' | 'user';
   }): AuthResponseDTO {
     return {
       id: data.id,
       phoneNum: data.phoneNum,
       accessToken: data.accessToken,
+      role: data.role,
     };
   }
 
