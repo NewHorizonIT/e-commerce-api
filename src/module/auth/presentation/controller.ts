@@ -19,7 +19,7 @@ export class AuthController {
     return {
       httpOnly: true,
       secure: config.app.isProduction,
-      sameSite: 'lax',
+      sameSite: config.app.isProduction ? 'none' : 'lax',
       maxAge: parseDurationToMilliseconds(config.jwt.refreshToken.expiresIn),
       path: '/',
     };
