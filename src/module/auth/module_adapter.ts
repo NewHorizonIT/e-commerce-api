@@ -64,6 +64,7 @@ export class AuthModuleAdapter implements IAuthModulePort {
       phoneNum: account.getPhoneNum().value,
       isLocked: account.getIsLocked(),
       createdDate: account.getCreatedDate(),
+      role: account.getRole(),
     };
   }
 }

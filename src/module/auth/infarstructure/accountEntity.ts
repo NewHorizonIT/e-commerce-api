@@ -12,6 +12,8 @@ export class AccountEntity {
   password!: string;
   @CreateDateColumn()
   createdDate!: Date;
+  @Column({ type: 'varchar', length: 10, default: 'user' })
+  role!: 'admin' | 'user';
   @Column({ type: 'boolean', default: false })
   isLocked!: boolean;
 }
@@ -24,6 +26,7 @@ export class AccountMapper {
       passwordHash: entity.password,
       createdDate: entity.createdDate,
       isLocked: entity.isLocked,
+      role: entity.role as 'admin' | 'user',
     });
   }
 
@@ -42,6 +45,7 @@ export class AccountMapper {
     }
 
     entity.isLocked = domain.getIsLocked();
+    entity.role = domain.getRole();
     return entity;
   }
 }

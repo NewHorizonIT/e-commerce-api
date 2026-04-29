@@ -11,6 +11,7 @@
     "seed:discount": "tsx scripts/seed-discount.ts",
     "seed:order": "tsx scripts/seed-order.ts",
     "seed:cart": "tsx scripts/seed-cart.ts",
+    "seed:user": "tsx scripts/seed-user.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

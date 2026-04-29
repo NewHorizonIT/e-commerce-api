@@ -27,16 +27,11 @@ import {
 // TypeORM DataSource Options
 const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
-  host: config.database.host,
-  port: config.database.port,
-  username: config.database.username,
-  password: config.database.password,
-  database: config.database.database,
-  ssl: config.database.ssl ? { rejectUnauthorized: false } : false,
+  url: process.env.DATABASE_URL, // 🔥 QUAN TRỌNG
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+
   synchronize: config.database.synchronize,
   logging: config.database.logging,
-  poolSize: config.database.maxConnections,
-  connectTimeoutMS: config.database.connectionTimeout,
   entities: [
     AccountEntity,
     CategoryEntity,

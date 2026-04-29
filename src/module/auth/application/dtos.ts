@@ -12,6 +12,7 @@
 export interface CreateAccountDTO {
   phoneNum: string;
   password: string;
+  role?: 'admin' | 'user';
 }
 
 export interface AuthSessionDTO {
@@ -19,12 +20,14 @@ export interface AuthSessionDTO {
   phoneNum: string;
   accessToken: string;
   refreshToken: string;
+  role: 'admin' | 'user';
 }
 
 export interface AuthResponseDTO {
   id: number;
   phoneNum: string;
   accessToken: string;
+  role: 'admin' | 'user';
 }
 
 export interface AuthAccountDTO {
@@ -32,9 +35,11 @@ export interface AuthAccountDTO {
   phoneNum: string;
   isLocked: boolean;
   createdDate: Date | null;
+  role: 'admin' | 'user';
 }
 
 export interface AuthSessionInfoDTO {
   id: number;
   phoneNum: string;
+  role: 'admin' | 'user';
 }

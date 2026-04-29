@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authenticate from '@/shared/middleware/authenticate';
+import authorizeRole from '@/shared/middleware/authorizeRole';
 import { OrderController } from './controller';
 import {
   listOrdersQuerySchema,
@@ -49,29 +50,11 @@ export function createOrderRouter(controller: OrderController): Router {
   //   );
 
   // ===== Admin =====
-  router.get(
-    '/admin/orders',
-    // authenticate,
-    validateRequest({ query: listOrdersQuerySchema }),
-    controller.listOrders.bind(controller)
-  );
+  router.get('/admin/orders', authenticate, authorizeRole('admin'), validateRequest({ query: listOrdersQuerySchema }), controller.listOrders.bind(controller));
 
-  router.get(
-    '/admin/orders/:orderId',
-    // authenticate,
-    validateRequest({ params: orderIdParamSchema }),
-    controller.findOrderById.bind(controller)
-  );
+  router.get('/admin/orders/:orderId', authenticate, authorizeRole('admin'), validateRequest({ params: orderIdParamSchema }), controller.findOrderById.bind(controller));
 
-  router.patch(
-    '/admin/orders/:orderId/status',
-    // authenticate,
-    validateRequest({
-      params: orderIdParamSchema,
-      body: updateOrderStatusSchema,
-    }),
-    controller.updateOrderStatus.bind(controller)
-  );
+  router.patch('/admin/orders/:orderId/status', authenticate, authorizeRole('admin'), validateRequest({ params: orderIdParamSchema, body: updateOrderStatusSchema }), controller.updateOrderStatus.bind(controller));
 
   //   router.get(
   //     '/admin/orders/check/account/:accountId',

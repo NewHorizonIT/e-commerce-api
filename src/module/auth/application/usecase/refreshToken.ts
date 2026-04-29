@@ -11,6 +11,8 @@ import { AUTH_TOKENS } from '../../tokens';
 
 interface RefreshTokenPayload {
   id: number;
+  role?: 'admin' | 'user';
+  phoneNum?: string;
 }
 
 @injectable()
@@ -45,6 +47,8 @@ export default class RefreshTokenUseCase {
 
     const { accessToken, refreshToken: nextRefreshToken } = generatePairJwtTokens({
       id: payload.id,
+      phoneNum: account.getPhoneNum().value,
+      role: account.getRole(),
     });
     await this.refreshTokenStore.save(payload.id, nextRefreshToken);
 
@@ -58,6 +62,7 @@ export default class RefreshTokenUseCase {
       phoneNum: account.getPhoneNum().value,
       accessToken,
       refreshToken: nextRefreshToken,
+      role: account.getRole(),
     };
   }
 }

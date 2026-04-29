@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authenticate from '@/shared/middleware/authenticate';
+import authorizeRole from '@/shared/middleware/authorizeRole';
 import { DiscountController } from './controller';
 import {
   listDiscountsQuerySchema,
@@ -45,46 +46,15 @@ export function createDiscountRouter(controller: DiscountController): Router {
   );
 
   // ===== Admin =====
-  router.get(
-    '/admin/discounts',
-    // authenticate,
-    validateRequest({ query: listDiscountsQuerySchema }),
-    controller.listDiscounts.bind(controller)
-  );
+  router.get('/admin/discounts', authenticate, authorizeRole('admin'), validateRequest({ query: listDiscountsQuerySchema }), controller.listDiscounts.bind(controller));
 
-  router.get(
-    '/admin/discounts/:discountId',
-    // authenticate,
-    validateRequest({ params: discountIdParamSchema }),
-    controller.findDiscountById.bind(controller)
-  );
+  router.get('/admin/discounts/:discountId', authenticate, authorizeRole('admin'), validateRequest({ params: discountIdParamSchema }), controller.findDiscountById.bind(controller));
 
-  router.post(
-    '/admin/discounts',
-    // authenticate,
-    validateRequest({ body: createDiscountSchema }),
-    controller.createDiscount.bind(controller)
-  );
+  router.post('/admin/discounts', authenticate, authorizeRole('admin'), validateRequest({ body: createDiscountSchema }), controller.createDiscount.bind(controller));
 
-  router.patch(
-    '/admin/discounts/:discountId',
-    // authenticate,
-    validateRequest({
-      params: discountIdParamSchema,
-      body: updateDiscountSchema,
-    }),
-    controller.updateDiscount.bind(controller)
-  );
+  router.patch('/admin/discounts/:discountId', authenticate, authorizeRole('admin'), validateRequest({ params: discountIdParamSchema, body: updateDiscountSchema }), controller.updateDiscount.bind(controller));
 
-  router.patch(
-    '/admin/discounts/:discountId/active',
-    // authenticate,
-    validateRequest({
-      params: discountIdParamSchema,
-      body: updateActiveDiscountSchema,
-    }),
-    controller.updateActiveDiscount.bind(controller)
-  );
+  router.patch('/admin/discounts/:discountId/active', authenticate, authorizeRole('admin'), validateRequest({ params: discountIdParamSchema, body: updateActiveDiscountSchema }), controller.updateActiveDiscount.bind(controller));
 
   return router;
 }

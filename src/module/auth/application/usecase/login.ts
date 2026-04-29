@@ -44,7 +44,11 @@ export default class LoginUseCase {
       throw new NotFoundAccountError(dto.phoneNum);
     }
 
-    const { accessToken, refreshToken } = generatePairJwtTokens({ id: accountId });
+    const { accessToken, refreshToken } = generatePairJwtTokens({
+      id: accountId,
+      phoneNum: account.getPhoneNum().value,
+      role: account.getRole(),
+    });
     await this.refreshTokenStore.save(accountId, refreshToken);
 
     appLogger.info('Auth login success', {
@@ -58,6 +62,7 @@ export default class LoginUseCase {
       phoneNum: account.getPhoneNum().value,
       accessToken,
       refreshToken,
+      role: account.getRole(),
     };
 
     return response;
