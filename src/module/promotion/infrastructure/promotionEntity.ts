@@ -36,7 +36,7 @@ export class PromotionDetailEntity {
         type: 'enum',
         enum: PromotionTypeEnum,
     })
-    type!: PromotionType;
+    type!: PromotionTypeEnum;
 
     @Column({
         type: 'decimal', precision: 12, scale: 3,
@@ -70,7 +70,7 @@ export class PromotionMapper {
         const details = detailEntities.map(detail => (
             PromotionDetail.rehydrate({
                 id: detail.id,
-                type: detail.type,
+                type: new PromotionType(detail.type),
                 promotionValue: detail.promotionValue,
                 productLimit: detail.productLimit,
                 usageLimitPerCustomer: detail.usageLimitPerCustomer,
@@ -89,20 +89,24 @@ export class PromotionMapper {
 
     static toEntity(domain: PromotionProgram): { promotionEntity: PromotionProgramEntity, detailEntities: PromotionDetailEntity[] } {
         const promotionEntity = new PromotionProgramEntity();
-
+        const domainId = domain.getId();
         const detailEntities: PromotionDetailEntity[] = domain.getDetails().map(detail => {
             const detailEntity = new PromotionDetailEntity();
-            detailEntity.id = detail.getRequiredId();
-            detailEntity.type = detail.getType();
+            const id = detail.getId();
+            if (id !== null) {
+                detailEntity.id = id;
+            }
+            detailEntity.type = detail.getType().value;
             detailEntity.promotionValue = detail.getPromotionValue();
             detailEntity.productLimit = detail.getProductLimit();
             detailEntity.usageLimitPerCustomer = detail.getUsageLimitPerCustomer();
-            detailEntity.promotionProgramId = domain.getRequiredId();
             detailEntity.variantId = detail.getVariantId();
             return detailEntity;
         });
 
-        promotionEntity.id = domain.getRequiredId();
+        if (domainId !== null) {
+            promotionEntity.id = domainId;
+        }
         promotionEntity.name = domain.getName();
         promotionEntity.startTime = domain.getStartTime();
         promotionEntity.endTime = domain.getEndTime();

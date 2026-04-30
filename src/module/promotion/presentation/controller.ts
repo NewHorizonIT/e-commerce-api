@@ -11,7 +11,7 @@ export class PromotionController {
         @inject(PROMOTION_TOKENS.IPromotionModulePort) private readonly promotionModulePort: IPromotionModulePort
     ) { }
 
-    async getAllPromotion(res: Response): Promise<void> {
+    async getAllPromotion(req :Request, res: Response): Promise<void> {
         const promotions = await this.promotionModulePort.getAllPromotion();
         new SuccessResponse(promotions, undefined, StatusCode.OK).send(res);
     }

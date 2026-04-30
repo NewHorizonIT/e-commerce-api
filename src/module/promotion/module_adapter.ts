@@ -34,6 +34,6 @@ export class PromotionModuleAdapter implements IPromotionModulePort {
         return this.deletePromotionUseCase.execute(id);
     }
     deleteDetailByVariantId(id: number, variantId: number): Promise<void> {
-        throw this.deletePromotionDetailUseCase.execute(id, variantId);
+        return this.deletePromotionDetailUseCase.execute(id, variantId);
     }
 }

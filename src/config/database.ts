@@ -23,6 +23,7 @@ import {
   PersonalInformationEntity,
   ShippingAddressEntity,
 } from '@/module/user/infrastructure/userEntity';
+import { PromotionDetailEntity, PromotionProgramEntity } from '@/module/promotion/infrastructure/promotionEntity.js';
 
 // TypeORM DataSource Options
 const dataSourceOptions: DataSourceOptions = {
@@ -50,6 +51,8 @@ const dataSourceOptions: DataSourceOptions = {
     CartEntity,
     PersonalInformationEntity,
     ShippingAddressEntity,
+    PromotionDetailEntity,
+    PromotionProgramEntity
   ],
   migrations: ['src/shared/infrastructure/database/migrations/**/*.{ts,js}'],
   subscribers: ['src/shared/infrastructure/database/subscribers/**/*.{ts,js}'],

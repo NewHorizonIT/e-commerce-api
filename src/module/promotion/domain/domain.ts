@@ -49,6 +49,11 @@ export class PromotionProgram {
         );
     }
 
+    public removeDetail(id: number){
+        const newDetail = this.details.filter(detail => detail.getRequiredId() !== id);
+        this.updateDetails(newDetail);
+    }
+
     public deleteDetail(variantId: number){
         const newDetail = this.details.filter(detail => detail.getVariantId() !== variantId);
         this.updateDetails(newDetail);

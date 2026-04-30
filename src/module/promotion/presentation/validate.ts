@@ -4,9 +4,7 @@ import { RequestHandler } from 'express';
 import { BadRequestError } from '@/shared/error/error';
 
 
-export const commonIdSchema = z.object({
-    id: z.string().regex(/^\d+$/, 'ID must be a number').transform(Number),
-});
+export const commonIdSchema = z.coerce.number();
 
 const promotionStatusEnum = z.enum(PromotionStatusEnum);
 const promotionTypeEnum = z.enum(PromotionTypeEnum);

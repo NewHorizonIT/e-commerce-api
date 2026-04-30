@@ -40,7 +40,7 @@ export class TypeORMPromotionRepository implements IPromotionRepository {
             const promotionProgramId = savedPromotionEntity.id;
 
             //1.Xóa item cần xóa
-            const currentDetailIds = detailEntities.map(item => item.id).filter(id => id !== null);
+            const currentDetailIds = detailEntities.map(item => item.id).filter(id => id);
             //not in có thể lỗi khi currentItemIds rỗng
             if (currentDetailIds.length === 0) {
                 await transactionalEntityManager.delete(PromotionDetailEntity, { promotionProgramId: promotionProgramId });
