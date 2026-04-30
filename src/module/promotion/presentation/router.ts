@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { PromotionController } from "./controller";
 import authenticate from "@/shared/middleware/authenticate";
-import { createPromotionSchema, promotionIdParamSchema, updatePromotionSchema, validateRequest } from "./validate";
+import { createPromotionSchema, promotionIdParamSchema, removeDetailParamSchema, updatePromotionSchema, validateRequest } from "./validate";
 
 export function createPromotionRouter(controller: PromotionController): Router {
     const router = Router();
@@ -9,6 +9,6 @@ export function createPromotionRouter(controller: PromotionController): Router {
     router.post('/admin/promotions', authenticate, validateRequest({ body: createPromotionSchema }), controller.createPromotion.bind(controller));
     router.put('/admin/promotions/:id', authenticate, validateRequest({ body: updatePromotionSchema, params: promotionIdParamSchema }), controller.updatePromotion.bind(controller));
     router.delete('/admin/promotions/:id', authenticate, validateRequest({ params: promotionIdParamSchema }), controller.deletePromotion.bind(controller));
-
+    router.delete('/admin/promotion/:id/variant/:variantId', authenticate, validateRequest({ params: removeDetailParamSchema }))
     return router;
 }

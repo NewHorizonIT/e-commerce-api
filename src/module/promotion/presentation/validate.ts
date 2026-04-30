@@ -3,6 +3,11 @@ import { PromotionStatusEnum, PromotionTypeEnum } from '../domain/value_objects'
 import { RequestHandler } from 'express';
 import { BadRequestError } from '@/shared/error/error';
 
+
+export const commonIdSchema = z.object({
+    id: z.string().regex(/^\d+$/, 'ID must be a number').transform(Number),
+});
+
 const promotionStatusEnum = z.enum(PromotionStatusEnum);
 const promotionTypeEnum = z.enum(PromotionTypeEnum);
 
@@ -46,9 +51,16 @@ export const updatePromotionSchema = z.object({
     message: "End time must be after start time",
     path: ["endTime"],
 });
+
 export const promotionIdParamSchema = z.object({
-    id: z.string().regex(/^\d+$/, 'ID must be a number').transform(Number),
+  id: commonIdSchema
 });
+
+export const removeDetailParamSchema = z.object({
+  id: commonIdSchema,
+  variantId: commonIdSchema
+});
+
 
 type SchemaMap = {
   body?: z.ZodTypeAny;

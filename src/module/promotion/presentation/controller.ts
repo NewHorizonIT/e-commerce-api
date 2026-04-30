@@ -32,4 +32,10 @@ export class PromotionController {
         await this.promotionModulePort.deletePromotion(Number(id));
         res.status(204).send();
     }
+    
+    async deletePromotionDetail(req: Request, res: Response): Promise<void>{
+        const { id, variantId } = req.params as { id: string , variantId: string};
+        await this.promotionModulePort.deleteDetailByVariantId(Number(id), Number(variantId));
+        res.status(204).send();
+    }
 }

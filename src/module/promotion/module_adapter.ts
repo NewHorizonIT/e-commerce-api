@@ -5,6 +5,7 @@ import GetAllPromotionUseCase from "./application/usecase/getAllPromotion";
 import CreatePromotionUseCase from './application/usecase/createPromotion';
 import UpdatePromotionUseCase from "./application/usecase/updatePromotion";
 import DeletePromotionUseCase from "./application/usecase/delete";
+import DeletePromotionDetailUseCase from "./application/usecase/deletePromotionDetail";
 
 @injectable()
 export class PromotionModuleAdapter implements IPromotionModulePort {
@@ -17,6 +18,8 @@ export class PromotionModuleAdapter implements IPromotionModulePort {
         private readonly updatePromoitonUseCase: UpdatePromotionUseCase,
         @inject(DeletePromotionUseCase)
         private readonly deletePromotionUseCase: DeletePromotionUseCase,
+        @inject(DeletePromotionDetailUseCase)
+        private readonly deletePromotionDetailUseCase: DeletePromotionDetailUseCase,
     ) { }
     getAllPromotion(): Promise<PromotionProgramDTO[]> {
         return this.getAllPromotionUseCase.execute();
@@ -29,5 +32,8 @@ export class PromotionModuleAdapter implements IPromotionModulePort {
     }
     deletePromotion(id: number): Promise<void> {
         return this.deletePromotionUseCase.execute(id);
+    }
+    deleteDetailByVariantId(id: number, variantId: number): Promise<void> {
+        throw this.deletePromotionDetailUseCase.execute(id, variantId);
     }
 }
