@@ -22,20 +22,20 @@ export class PromotionController {
     }
 
     async updatePromotion(req: Request, res: Response): Promise<void> {
-        const { id } = req.params as { id: string };
-        const promotion = await this.promotionModulePort.updatePromotion(req.body, Number(id));
+        const { promotionId } = req.params as { promotionId: string };
+        const promotion = await this.promotionModulePort.updatePromotion(req.body, Number(promotionId));
         new SuccessResponse(promotion, 'Promotion updated successfully', StatusCode.OK).send(res);
     }
 
     async deletePromotion(req: Request, res: Response): Promise<void> {
-        const { id } = req.params as { id: string };
-        await this.promotionModulePort.deletePromotion(Number(id));
+        const { promotionId } = req.params as { promotionId: string };
+        await this.promotionModulePort.deletePromotion(Number(promotionId));
         res.status(204).send();
     }
     
     async deletePromotionDetail(req: Request, res: Response): Promise<void>{
-        const { id, variantId } = req.params as { id: string , variantId: string};
-        await this.promotionModulePort.deleteDetailByVariantId(Number(id), Number(variantId));
+        const { promotionId, variantId } = req.params as { promotionId: string , variantId: string};
+        await this.promotionModulePort.deleteDetailByVariantId(Number(promotionId), Number(variantId));
         res.status(204).send();
     }
 }

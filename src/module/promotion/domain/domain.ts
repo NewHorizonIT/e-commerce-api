@@ -1,4 +1,4 @@
-import { InvalidTimeRangeError, UnexpectedMissingPromotionDetailIdError, UnexpectedMissingPromotionIdError } from "./errors";
+import { InvalidTimeRangeError, NotFoundVariantInPromotionDetails, UnexpectedMissingPromotionDetailIdError, UnexpectedMissingPromotionIdError } from "./errors";
 import { PromotionStatus, PromotionType } from "./value_objects";
 
 export class PromotionProgram {
@@ -49,12 +49,16 @@ export class PromotionProgram {
         );
     }
 
-    public removeDetail(id: number){
+    public removeDetail(id: number) {
         const newDetail = this.details.filter(detail => detail.getRequiredId() !== id);
         this.updateDetails(newDetail);
     }
 
-    public deleteDetail(variantId: number){
+    public deleteDetail(variantId: number) {
+        const exists = this.details.some(d => d.getVariantId() === variantId);
+        if (!exists) {
+            throw new NotFoundVariantInPromotionDetails(variantId);
+        }
         const newDetail = this.details.filter(detail => detail.getVariantId() !== variantId);
         this.updateDetails(newDetail);
     }

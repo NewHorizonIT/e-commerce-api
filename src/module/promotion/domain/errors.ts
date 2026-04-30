@@ -41,3 +41,9 @@ export class InvalidTimeRangeError extends AppError {
     );
   }
 }
+
+export class NotFoundVariantInPromotionDetails extends AppError {
+  constructor(id: number) {
+    super(`Variant with ID ${id} not found in promotion details`, 'NOT_FOUND_VARIANT_IN_PROMOTION_DETAILS', 404);
+  }
+}

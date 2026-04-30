@@ -25,6 +25,8 @@ tags:
     description: Current user profile and address management APIs
   - name: Payment
     description: Payment initiation and gateway callback APIs
+  - name: Promotion Admin
+    description: Admin promotion management APIs (requires admin role)
 
 paths:
   /auth/accounts:
@@ -1177,6 +1179,108 @@ paths:
                       data:
                         $ref: '#/components/schemas/Cart'
 
+  /admin/promotions:
+    get:
+      tags: [Promotion Admin]
+      summary: Get All Promotion
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Promotions
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Promotion'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/SimpleMessageError'
+                  - $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags: [Promotion Admin]
+      summary: Create promotion
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePromotionRequest'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Promotion'
+
+  /admin/promotions/{promotionId}:
+    put:
+      tags: [Promotion Admin]
+      summary: Upsert Promotion Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PromotionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePromotionRequest'
+      responses:
+        '200':
+          description: Promotion saved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Promotion'
+    delete:
+      tags: [Promotion Admin]
+      summary: Delete promotion
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PromotionId'
+      responses:
+        '204':
+          description: Promotion deleted
+
+  /admin/promotions/{promotionId}/variant/{variantId}:
+    delete:
+      tags: [Promotion Admin]
+      summary: Delete promotion detail
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PromotionId'
+        - $ref: '#/components/parameters/VariantId'
+      responses:
+        '204':
+          description: Promotion deleted
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1314,6 +1418,13 @@ components:
         minimum: 1
     AddressId:
       name: addressId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    PromotionId:
+      name: promotionId
       in: path
       required: true
       schema:
@@ -2154,3 +2265,107 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CartItemDetail'
+    
+    PromotionDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        productLimit:
+          type: integer
+        promotionProgramId:
+          type: integer
+        promotionValue:
+          type: number
+        type:
+          type: string
+          enum: [percentage, fixed]
+        usageLimitPerCustomer:
+          type: integer
+        variantId:
+          type: integer
+
+    Promotion:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [draft, active, inactive]
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/PromotionDetail'
+
+    CreatePromotionRequest:
+      type: object
+      required: [name, startTime, endTime]
+      properties:
+        name:
+          type: string
+
+        startTime:
+          type: string
+          format: date-time
+
+        endTime:
+          type: string
+          format: date-time
+
+    PromotionDetailRequest:
+      type: object
+      required: [type, promotionValue, productLimit, usageLimitPerCustomer, variantId]
+      properties:
+        id:
+          type: integer
+          nullable: true
+          description: Có thì update, không có thì tạo mới
+
+        type:
+          type: string
+          enum: [percentage, fixed]
+
+        promotionValue:
+          type: number
+
+        productLimit:
+          type: integer
+
+        usageLimitPerCustomer:
+          type: integer
+
+        variantId:
+          type: integer
+
+    UpdatePromotionRequest:
+      type: object
+      required: [name, startTime, endTime, status, details]
+      properties:
+        name:
+          type: string
+
+        startTime:
+          type: string
+          format: date-time
+
+        endTime:
+          type: string
+          format: date-time
+
+        status:
+          type: string
+          enum: [active, inactive]
+
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/PromotionDetailRequest'

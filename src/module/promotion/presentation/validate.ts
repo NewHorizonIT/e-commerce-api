@@ -51,11 +51,11 @@ export const updatePromotionSchema = z.object({
 });
 
 export const promotionIdParamSchema = z.object({
-  id: commonIdSchema
+  promotionId: commonIdSchema
 });
 
 export const removeDetailParamSchema = z.object({
-  id: commonIdSchema,
+  promotionId: commonIdSchema,
   variantId: commonIdSchema
 });
 
