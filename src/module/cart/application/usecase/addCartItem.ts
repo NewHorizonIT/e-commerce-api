@@ -2,8 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import { CART_TOKENS } from '../../tokens';
 import { ICartRepository } from '../../domain/interface';
 import { CartDTO, CartItemDetailDTO } from '../dtos';
-import { NotFoundCartItemErrorByAccountId } from './errors';
-import { CartItemDetail } from '../../domain/domain';
+import { Cart, CartItemDetail } from '../../domain/domain';
 import { Quantity } from '../../domain/value_objects';
 import GetCurrentCartUseCase from './getCurrentCart';
 
@@ -17,10 +16,11 @@ export default class AddCartItemUseCase {
   ) {}
 
   async execute(accountId: number, dto: CartItemDetailDTO): Promise<CartDTO> {
-    const cart = await this.cartRepository.findByAccountId(accountId);
+    let cart = await this.cartRepository.findByAccountId(accountId);
 
     if (!cart) {
-      throw new NotFoundCartItemErrorByAccountId(accountId);
+      cart = Cart.create({ accountId });
+      cart = await this.cartRepository.save(cart);
     }
 
     const item = CartItemDetail.create({
