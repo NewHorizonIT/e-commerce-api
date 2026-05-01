@@ -193,7 +193,7 @@ export class TypeORMProductRepository implements IProductRepository {
   ): Promise<ProductDetailDTO | null> {
     const product = await this.productRepo.findOne({
       where: includeHidden ? { id: productId } : { id: productId, isHidden: false },
-      relations: ['variants'],
+      relations: ['variants', 'variantGroups'],
     });
 
     if (!product) {
@@ -203,8 +203,18 @@ export class TypeORMProductRepository implements IProductRepository {
     const variantIds = product.variants.map((variant) => variant.id);
     const details =
       variantIds.length > 0
-        ? await this.variantDetailRepo.find({ where: variantIds.map((id) => ({ variantId: id })) })
+        ? await this.variantDetailRepo.find({
+            where: variantIds.map((id) => ({ variantId: id })),
+            relations: ['value', 'value.group'],
+          })
         : [];
+
+    // Fetch variant groups with their values
+    const variantGroups = await this.variantGroupRepo.find({
+      where: { productId },
+      relations: ['values'],
+      order: { displayOrder: 'ASC', id: 'ASC' },
+    });
 
     return {
       id: product.id,
@@ -221,9 +231,27 @@ export class TypeORMProductRepository implements IProductRepository {
         stockQuantity: variant.stockQuantity,
         isDefault: variant.isDefault,
         imageUrl: variant.imageUrl,
-        valueIds: details
+        values: details
           .filter((detail) => detail.variantId === variant.id)
-          .map((d) => d.variantValueId),
+          .map((d) => ({
+            id: d.value.id,
+            value: d.value.value,
+            imageUrl: d.value.imageUrl,
+            variantGroupId: d.value.group.id,
+            variantGroupName: d.value.group.name,
+          })),
+      })),
+      variantGroups: variantGroups.map((group) => ({
+        id: group.id,
+        name: group.name,
+        displayOrder: group.displayOrder,
+        values: group.values
+          .sort((a, b) => a.id - b.id)
+          .map((value) => ({
+            id: value.id,
+            value: value.value,
+            imageUrl: value.imageUrl,
+          })),
       })),
     };
   }

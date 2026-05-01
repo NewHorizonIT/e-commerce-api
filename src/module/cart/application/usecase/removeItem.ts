@@ -1,15 +1,18 @@
-import { inject, injectable } from "tsyringe";
-import { CART_TOKENS } from "../../tokens";
-import { ICartRepository } from "../../domain/interface";
-import { CartDTO, CartItemDetailDTO } from "../dtos";
-import { NotFoundCartItemErrorByAccountId, NotFoundCartItemErrorByVariantId } from "./errors";
+import { inject, injectable } from 'tsyringe';
+import { CART_TOKENS } from '../../tokens';
+import { ICartRepository } from '../../domain/interface';
+import { CartDTO, CartItemDetailDTO } from '../dtos';
+import { NotFoundCartItemErrorByAccountId, NotFoundCartItemErrorByVariantId } from './errors';
+import GetCurrentCartUseCase from './getCurrentCart';
 
 @injectable()
 export default class RemoveItemUseCase {
   constructor(
     @inject(CART_TOKENS.ICartRepository)
-    private readonly cartRepository: ICartRepository
-  ) { }
+    private readonly cartRepository: ICartRepository,
+    @inject(GetCurrentCartUseCase)
+    private readonly getCurrentCartUseCase: GetCurrentCartUseCase
+  ) {}
 
   async execute(accountId: number, variantId: number): Promise<CartDTO> {
     const cart = await this.cartRepository.findByAccountId(accountId);
@@ -18,30 +21,13 @@ export default class RemoveItemUseCase {
       throw new NotFoundCartItemErrorByAccountId(accountId);
     }
 
-    if(!cart.hasVariant(variantId)){
-        throw new NotFoundCartItemErrorByVariantId(variantId);
+    if (!cart.hasVariant(variantId)) {
+      throw new NotFoundCartItemErrorByVariantId(variantId);
     }
 
     cart.removeItem(variantId);
 
-    const savedCart = await this.cartRepository.save(cart);
-
-    const itemsDTO: CartItemDetailDTO[] = savedCart.getItems().map((item): CartItemDetailDTO => {
-      const itemId = item.getRequiredId();
-      return ({
-        id: itemId,
-        quantity: item.getQuantity().getValue(),
-        cartId: item.getCartid(),
-        variantId: item.getVariantId()
-      });
-    });
-
-    // Create response
-    const response: CartDTO = {
-      id: savedCart.getRequiredId(),
-      accountId: savedCart.getAccountId(),
-      items: itemsDTO
-    };
-    return response;
+    await this.cartRepository.save(cart);
+    return await this.getCurrentCartUseCase.execute(accountId);
   }
 }

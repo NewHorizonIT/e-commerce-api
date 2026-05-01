@@ -36,13 +36,34 @@ export interface ProductSummaryDTO {
   };
 }
 
+export interface VariantValueSimpleDTO {
+  id: number;
+  value: string;
+  imageUrl: string | null;
+}
+
+export interface VariantGroupDetailDTO {
+  id: number;
+  name: string;
+  displayOrder: number;
+  values: VariantValueSimpleDTO[];
+}
+
+export interface VariantValueDetailDTO {
+  id: number;
+  value: string;
+  imageUrl: string | null;
+  variantGroupId: number;
+  variantGroupName: string;
+}
+
 export interface ProductVariantDTO {
   id: number;
   price: number;
   stockQuantity: number;
   isDefault: boolean;
   imageUrl: string | null;
-  valueIds: number[];
+  values: VariantValueDetailDTO[];
 }
 
 export interface ProductDetailDTO {
@@ -55,6 +76,7 @@ export interface ProductDetailDTO {
   categoryId: number;
   productTypeId: number;
   variants: ProductVariantDTO[];
+  variantGroups: VariantGroupDetailDTO[];
 }
 
 export interface PaginatedProductsDTO {
