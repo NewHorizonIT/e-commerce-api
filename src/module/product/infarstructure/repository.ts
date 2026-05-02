@@ -6,6 +6,7 @@ import {
   CreateVariantGroupDTO,
   CreateVariantValueDTO,
   CreateVariantDTO,
+  ProductAttributeDTO,
   PaginatedProductsDTO,
   ProductDetailDTO,
   ProductListQueryDTO,
@@ -22,6 +23,7 @@ import {
 import { IProductRepository } from '../domain/interface';
 import {
   CategoryEntity,
+  ProductDetailEntity,
   ProductEntity,
   ProductTypeEntity,
   VariantDetailEntity,
@@ -48,6 +50,7 @@ export class TypeORMProductRepository implements IProductRepository {
   private readonly productTypeRepo = AppDataSource.getRepository(ProductTypeEntity);
   private readonly variantGroupRepo = AppDataSource.getRepository(VariantGroupEntity);
   private readonly variantValueRepo = AppDataSource.getRepository(VariantValueEntity);
+  private readonly productDetailRepo = AppDataSource.getRepository(ProductDetailEntity);
 
   async listProducts(
     rawQuery: ProductListQueryDTO,
@@ -216,6 +219,22 @@ export class TypeORMProductRepository implements IProductRepository {
       order: { displayOrder: 'ASC', id: 'ASC' },
     });
 
+    const attributes = await this.loadProductAttributes(productId);
+
+    const ratingRow = await AppDataSource.query(
+      `
+        SELECT
+          COALESCE(ROUND(AVG(r.rating)::numeric, 2), 0) AS average_rating,
+          COUNT(*)::int AS total_reviews
+        FROM reviews r
+        WHERE r.product_id = $1
+      `,
+      [productId]
+    );
+
+    const averageRating = Number(ratingRow[0]?.average_rating ?? 0);
+    const totalReviews = Number(ratingRow[0]?.total_reviews ?? 0);
+
     return {
       id: product.id,
       name: product.name,
@@ -223,8 +242,11 @@ export class TypeORMProductRepository implements IProductRepository {
       totalSold: product.totalSold,
       hasVariant: product.hasVariant,
       isHidden: product.isHidden,
+      averageRating,
+      totalReviews,
       categoryId: product.categoryId,
       productTypeId: product.productTypeId,
+      attributes,
       variants: product.variants.map((variant) => ({
         id: variant.id,
         price: Number(variant.price),
@@ -637,7 +659,7 @@ export class TypeORMProductRepository implements IProductRepository {
       const reviewRows = await AppDataSource.query(
         `
         SELECT COUNT(*)::int AS count
-        FROM product_reviews pr
+        FROM reviews pr
         WHERE pr.product_id = $1
         `,
         [productId]
@@ -651,6 +673,56 @@ export class TypeORMProductRepository implements IProductRepository {
     } catch {
       // Keep deletion workflow resilient in early schema stages.
       return false;
+    }
+  }
+
+  private async loadProductAttributes(productId: number): Promise<ProductAttributeDTO[]> {
+    try {
+      const rows = await this.productDetailRepo.find({
+        where: { productId },
+        relations: { attribute: true },
+        order: {
+          attribute: { id: 'ASC' },
+          id: 'ASC',
+        },
+      });
+
+      const attributesById = new Map<number, ProductAttributeDTO>();
+
+      for (const row of rows) {
+        const attribute = row.attribute;
+
+        if (!attribute) {
+          continue;
+        }
+
+        const attributeId = attribute.id;
+        const current = attributesById.get(attributeId);
+
+        if (current) {
+          current.values.push({
+            id: row.id,
+            value: row.value,
+          });
+          continue;
+        }
+
+        attributesById.set(attributeId, {
+          id: attributeId,
+          name: attribute.name,
+          dataType: attribute.dataType,
+          values: [
+            {
+              id: row.id,
+              value: row.value,
+            },
+          ],
+        });
+      }
+
+      return Array.from(attributesById.values());
+    } catch {
+      return [];
     }
   }
 }

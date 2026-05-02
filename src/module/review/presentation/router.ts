@@ -39,6 +39,13 @@ export function createReviewRouter(controller: ReviewController): Router {
     controller.listReviews.bind(controller)
   );
 
+  // 🔹 List reviews by product (public)
+  router.get(
+    '/products/:productId/reviews',
+    validateRequest({ params: productIdParamSchema, query: listReviewsQuerySchema }),
+    controller.listProductReviews.bind(controller)
+  );
+
   // 🔹 Rating summary theo product
   router.get(
     '/products/:productId/reviews/summary',

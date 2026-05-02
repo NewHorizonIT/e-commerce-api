@@ -42,6 +42,18 @@ export interface VariantValueSimpleDTO {
   imageUrl: string | null;
 }
 
+export interface ProductAttributeValueDTO {
+  id: number;
+  value: string;
+}
+
+export interface ProductAttributeDTO {
+  id: number;
+  name: string;
+  dataType: string;
+  values: ProductAttributeValueDTO[];
+}
+
 export interface VariantGroupDetailDTO {
   id: number;
   name: string;
@@ -73,8 +85,11 @@ export interface ProductDetailDTO {
   totalSold: number;
   hasVariant: boolean;
   isHidden: boolean;
+  averageRating: number;
+  totalReviews: number;
   categoryId: number;
   productTypeId: number;
+  attributes: ProductAttributeDTO[];
   variants: ProductVariantDTO[];
   variantGroups: VariantGroupDetailDTO[];
 }

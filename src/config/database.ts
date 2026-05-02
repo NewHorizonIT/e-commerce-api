@@ -3,7 +3,11 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { config } from './config.js';
 import { AccountEntity } from '@/module/auth/infarstructure/accountEntity.js';
 import {
+  AttributeEntity,
   CategoryEntity,
+  CategoryDetailEntity,
+  MediaFileEntity,
+  ProductDetailEntity,
   ProductEntity,
   ProductTypeEntity,
   VariantDetailEntity,
@@ -35,8 +39,12 @@ const dataSourceOptions: DataSourceOptions = {
   entities: [
     AccountEntity,
     CategoryEntity,
+    CategoryDetailEntity,
+    AttributeEntity,
     ProductTypeEntity,
     ProductEntity,
+    ProductDetailEntity,
+    MediaFileEntity,
     VariantEntity,
     VariantGroupEntity,
     VariantValueEntity,
