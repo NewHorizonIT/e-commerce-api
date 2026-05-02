@@ -1121,6 +1121,31 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/Cart'
+    patch:
+      tags: [Cart]
+      summary: Update cart item quantity
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/VariantId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartItemDetailQuantity'
+      responses:
+        '200':
+          description: Cart item quantity updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Cart'
 
   /payment/cod:
     post:
@@ -1299,31 +1324,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-    patch:
-      tags: [Cart]
-      summary: Update cart item quantity
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/VariantId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateCartItemDetailQuantity'
-      responses:
-        '200':
-          description: Cart item quantity updated
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessEnvelope'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Cart'
 
 components:
   securitySchemes:
