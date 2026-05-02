@@ -18,6 +18,9 @@ export class CategoryEntity {
 
   @OneToMany(() => ProductEntity, (product) => product.category)
   products!: ProductEntity[];
+
+  @OneToMany(() => CategoryDetailEntity, (detail) => detail.category)
+  details!: CategoryDetailEntity[];
 }
 
 @Entity('product_types')
@@ -30,6 +33,28 @@ export class ProductTypeEntity {
 
   @OneToMany(() => ProductEntity, (product) => product.productType)
   products!: ProductEntity[];
+}
+
+@Entity('attributes')
+export class AttributeEntity {
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column({ type: 'varchar', length: 255 })
+  name!: string;
+
+  @Column({
+    type: 'enum',
+    enum: ['string', 'int', 'bool', 'decimal'],
+    name: 'data_type',
+  })
+  dataType!: 'string' | 'int' | 'bool' | 'decimal';
+
+  @OneToMany(() => ProductDetailEntity, (detail) => detail.attribute)
+  productDetails!: ProductDetailEntity[];
+
+  @OneToMany(() => CategoryDetailEntity, (detail) => detail.attribute)
+  categoryDetails!: CategoryDetailEntity[];
 }
 
 @Entity('products')
@@ -71,6 +96,75 @@ export class ProductEntity {
 
   @OneToMany(() => VariantGroupEntity, (group) => group.product)
   variantGroups!: VariantGroupEntity[];
+
+  @OneToMany(() => ProductDetailEntity, (detail) => detail.product)
+  productDetails!: ProductDetailEntity[];
+}
+
+@Entity('category_details')
+export class CategoryDetailEntity {
+  @PrimaryColumn({ type: 'int', name: 'category_id' })
+  categoryId!: number;
+
+  @PrimaryColumn({ type: 'int', name: 'attribute_id' })
+  attributeId!: number;
+
+  @ManyToOne(() => CategoryEntity, (category) => category.details, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'category_id' })
+  category!: CategoryEntity;
+
+  @ManyToOne(() => AttributeEntity, (attribute) => attribute.categoryDetails, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'attribute_id' })
+  attribute!: AttributeEntity;
+}
+
+@Entity('product_details')
+export class ProductDetailEntity {
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column({ type: 'varchar', length: 255 })
+  value!: string;
+
+  @Column({ type: 'int', name: 'product_id' })
+  productId!: number;
+
+  @Column({ type: 'int', name: 'attribute_id' })
+  attributeId!: number;
+
+  @ManyToOne(() => ProductEntity, (product) => product.productDetails, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'product_id' })
+  product!: ProductEntity;
+
+  @ManyToOne(() => AttributeEntity, (attribute) => attribute.productDetails, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'attribute_id' })
+  attribute!: AttributeEntity;
+}
+
+@Entity('media_files')
+export class MediaFileEntity {
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column({ type: 'varchar', length: 255 })
+  url!: string;
+
+  @Column({
+    type: 'enum',
+    enum: ['image', 'video'],
+    name: 'file_type',
+  })
+  fileType!: 'image' | 'video';
+
+  @Column({ type: 'varchar', length: 255, name: 'entity_type' })
+  entityType!: string;
+
+  @Column({ type: 'int', name: 'entity_id' })
+  entityId!: number;
 }
 
 @Entity('variants')

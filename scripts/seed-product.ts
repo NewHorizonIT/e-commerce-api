@@ -10,6 +10,12 @@ import {
   VariantGroupEntity,
   VariantValueEntity,
 } from '../src/module/product/infarstructure/productEntity';
+import {
+  AttributeEntity,
+  ProductDetailEntity,
+  CategoryDetailEntity,
+  MediaFileEntity,
+} from '../src/module/product/infarstructure/productEntity';
 
 async function seed(): Promise<void> {
   await AppDataSource.initialize();
@@ -23,6 +29,10 @@ async function seed(): Promise<void> {
     const variantGroupRepo = AppDataSource.getRepository(VariantGroupEntity);
     const variantValueRepo = AppDataSource.getRepository(VariantValueEntity);
     const variantDetailRepo = AppDataSource.getRepository(VariantDetailEntity);
+    const attributeRepo = AppDataSource.getRepository(AttributeEntity);
+    const productDetailRepo = AppDataSource.getRepository(ProductDetailEntity);
+    const categoryDetailRepo = AppDataSource.getRepository(CategoryDetailEntity);
+    const mediaFileRepo = AppDataSource.getRepository(MediaFileEntity);
 
     const queryRunner = AppDataSource.createQueryRunner();
     await queryRunner.connect();
@@ -67,6 +77,21 @@ async function seed(): Promise<void> {
         await queryRunner.query(`DELETE FROM variants WHERE product_id = ANY($1)`, [
           existingProductIds,
         ]);
+
+        // remove product-level details, category-details mappings and media files
+        await queryRunner.query(`DELETE FROM product_details WHERE product_id = ANY($1)`, [
+          existingProductIds,
+        ]);
+
+        await queryRunner.query(
+          `DELETE FROM category_details WHERE category_id IN (SELECT category_id FROM products WHERE id = ANY($1))`,
+          [existingProductIds]
+        );
+
+        await queryRunner.query(
+          `DELETE FROM media_files WHERE entity_type = 'product' AND entity_id = ANY($1)`,
+          [existingProductIds]
+        );
 
         await queryRunner.query(`DELETE FROM products WHERE id = ANY($1)`, [existingProductIds]);
       }
@@ -216,7 +241,7 @@ async function seed(): Promise<void> {
       }),
     ]);
 
-    await variantRepo.save(
+    const macbookVariant = await variantRepo.save(
       variantRepo.create({
         productId: macbook.id,
         price: 26990000,
@@ -225,6 +250,87 @@ async function seed(): Promise<void> {
         imageUrl: null,
       })
     );
+
+    // Create a default variant group + value for MacBook so product detail shows variantGroups
+    const macbookColorGroup = await variantGroupRepo.save(
+      variantGroupRepo.create({ productId: macbook.id, name: 'Color', displayOrder: 1 })
+    );
+
+    const macbookColorValue = await variantValueRepo.save(
+      variantValueRepo.create({
+        variantGroupId: macbookColorGroup.id,
+        value: 'Space Gray',
+        imageUrl: null,
+      })
+    );
+
+    await variantDetailRepo.save(
+      variantDetailRepo.create({
+        variantId: macbookVariant.id,
+        variantValueId: macbookColorValue.id,
+      })
+    );
+
+    // --- Attributes & product details ---
+    const colorAttr =
+      (await attributeRepo.findOne({ where: { name: 'Color' } })) ??
+      (await attributeRepo.save(attributeRepo.create({ name: 'Color', dataType: 'string' })));
+
+    const storageAttr =
+      (await attributeRepo.findOne({ where: { name: 'Storage' } })) ??
+      (await attributeRepo.save(attributeRepo.create({ name: 'Storage', dataType: 'string' })));
+
+    // Link attributes to categories
+    await categoryDetailRepo.save([
+      categoryDetailRepo.create({ categoryId: smartphoneCategory.id, attributeId: colorAttr.id }),
+      categoryDetailRepo.create({ categoryId: smartphoneCategory.id, attributeId: storageAttr.id }),
+      categoryDetailRepo.create({ categoryId: laptopCategory.id, attributeId: storageAttr.id }),
+    ]);
+
+    // Product-level attribute values (product_details)
+    await productDetailRepo.save([
+      productDetailRepo.create({
+        productId: iphone.id,
+        attributeId: colorAttr.id,
+        value: 'Titanium Natural',
+      }),
+      productDetailRepo.create({
+        productId: iphone.id,
+        attributeId: colorAttr.id,
+        value: 'Titanium Black',
+      }),
+      productDetailRepo.create({
+        productId: iphone.id,
+        attributeId: storageAttr.id,
+        value: '128GB',
+      }),
+      productDetailRepo.create({
+        productId: iphone.id,
+        attributeId: storageAttr.id,
+        value: '256GB',
+      }),
+      productDetailRepo.create({
+        productId: macbook.id,
+        attributeId: storageAttr.id,
+        value: '256GB',
+      }),
+    ]);
+
+    // --- Media files ---
+    await mediaFileRepo.save([
+      mediaFileRepo.create({
+        entityType: 'product',
+        entityId: iphone.id,
+        url: 'https://example.com/iphone-16-pro.jpg',
+        fileType: 'image',
+      }),
+      mediaFileRepo.create({
+        entityType: 'product',
+        entityId: macbook.id,
+        url: 'https://example.com/macbook-air-m4.jpg',
+        fileType: 'image',
+      }),
+    ]);
 
     console.log('Seed completed successfully.');
     console.log('Test account: 0912345678 / Password123');

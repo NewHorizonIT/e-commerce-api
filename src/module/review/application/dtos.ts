@@ -15,14 +15,35 @@ export interface UpdateReviewDTO {
   content?: string;
 }
 
+export interface ReviewMediaDTO {
+  id: number;
+  url: string;
+  fileType: 'image' | 'video';
+}
+
+export interface ReviewSelectedAttributeDTO {
+  variantId: number;
+  variantName: string;
+  groupId: number;
+  groupName: string;
+  valueId: number;
+  value: string;
+  imageUrl: string | null;
+}
+
 export interface ReviewDetailDTO {
   id: number;
   productId: number;
   accountId: number;
+  idUser: number;
+  username: string;
+  avatarUrl: string | null;
   orderId: number;
   rating: number;
   content: string | null;
   createdAt: Date;
+  selectedAttributes: ReviewSelectedAttributeDTO[];
+  media: ReviewMediaDTO[];
 }
 
 export interface ReviewListQueryDTO {

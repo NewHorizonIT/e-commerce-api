@@ -25,6 +25,8 @@ tags:
     description: Cart management APIs
   - name: User
     description: Current user profile and address management APIs
+  - name: Review
+    description: Product review APIs
   - name: Payment
     description: Payment initiation and gateway callback APIs
 
@@ -303,6 +305,150 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/ProductDetail'
+
+  /products/{productId}/reviews:
+    get:
+      tags: [Review]
+      summary: List reviews for a product
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Review list for product
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PaginatedReviews'
+
+  /reviews:
+    get:
+      tags: [Review]
+      summary: List reviews
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: productId
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Review list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PaginatedReviews'
+    post:
+      tags: [Review]
+      summary: Create review
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRequest'
+      responses:
+        '201':
+          description: Review created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ReviewDetail'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /reviews/{reviewId}:
+    patch:
+      tags: [Review]
+      summary: Update review
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReviewRequest'
+      responses:
+        '200':
+          description: Review updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ReviewDetail'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /products/{productId}/reviews/summary:
+    get:
+      tags: [Review]
+      summary: Get rating summary by product
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Rating summary
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RatingSummary'
 
   /categories:
     get:
@@ -1328,7 +1474,6 @@ components:
       properties:
         isSuccess:
           type: boolean
-          example: true
         data:
           nullable: true
         message:
@@ -1632,6 +1777,169 @@ components:
           items:
             type: integer
 
+    ProductAttributeValue:
+      type: object
+      properties:
+        id:
+          type: integer
+        value:
+          type: string
+
+    ProductAttribute:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        dataType:
+          type: string
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAttributeValue'
+
+    ReviewMedia:
+      type: object
+      properties:
+        id:
+          type: integer
+        url:
+          type: string
+        fileType:
+          type: string
+          enum: [image, video]
+
+    ReviewSelectedAttribute:
+      type: object
+      properties:
+        variantId:
+          type: integer
+        variantName:
+          type: string
+        groupId:
+          type: integer
+        groupName:
+          type: string
+        valueId:
+          type: integer
+        value:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+
+    ReviewDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        idUser:
+          type: integer
+        accountId:
+          type: integer
+        username:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+        orderId:
+          type: integer
+        rating:
+          type: integer
+        content:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        selectedAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewSelectedAttribute'
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewMedia'
+
+    PaginatedReviews:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewDetail'
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    RatingDistribution:
+      type: object
+      properties:
+        '5':
+          type: integer
+        '4':
+          type: integer
+        '3':
+          type: integer
+        '2':
+          type: integer
+        '1':
+          type: integer
+
+    RatingSummary:
+      type: object
+      properties:
+        productId:
+          type: integer
+        averageRating:
+          type: number
+          format: float
+        totalReviews:
+          type: integer
+        ratingDistribution:
+          $ref: '#/components/schemas/RatingDistribution'
+
+    CreateReviewRequest:
+      type: object
+      required: [productId, orderId, accountId, rating]
+      properties:
+        productId:
+          type: integer
+          minimum: 1
+        orderId:
+          type: integer
+          minimum: 1
+        accountId:
+          type: integer
+          minimum: 1
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        content:
+          type: string
+          maxLength: 1000
+          nullable: true
+
+    UpdateReviewRequest:
+      type: object
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        content:
+          type: string
+          maxLength: 1000
+
     ProductDetail:
       type: object
       properties:
@@ -1648,10 +1956,19 @@ components:
           type: boolean
         isHidden:
           type: boolean
+        averageRating:
+          type: number
+          format: float
+        totalReviews:
+          type: integer
         categoryId:
           type: integer
         productTypeId:
           type: integer
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAttribute'
         variants:
           type: array
           items:
