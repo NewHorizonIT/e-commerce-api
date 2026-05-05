@@ -6,7 +6,9 @@ info:
 
 servers:
   - url: http://localhost:4444/api/v1
-    description: Local development
+    description: Development
+  - url: https://e-commerce-api-production-2b7d.up.railway.app/api/v1
+    description: Production
 
 tags:
   - name: Auth
