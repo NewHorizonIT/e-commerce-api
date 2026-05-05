@@ -7,8 +7,6 @@ info:
 servers:
   - url: http://localhost:4444/api/v1
     description: Local development
-  - url: https://e-commerce-api-production-2b7d.up.railway.app/api/v1
-    description: Production
 
 tags:
   - name: Auth
@@ -29,6 +27,8 @@ tags:
     description: Product review APIs
   - name: Payment
     description: Payment initiation and gateway callback APIs
+  - name: Stats
+    description: Admin statistics and dashboard APIs (requires admin role)
 
 paths:
   /auth/accounts:
@@ -1325,6 +1325,146 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /admin/stats/overview:
+    get:
+      tags: [Stats]
+      summary: Get admin dashboard overview statistics
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StatsFrom'
+        - $ref: '#/components/parameters/StatsTo'
+      responses:
+        '200':
+          description: Dashboard overview statistics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StatsOverview'
+
+  /admin/stats/orders/trend:
+    get:
+      tags: [Stats]
+      summary: Get order revenue trend
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StatsFrom'
+        - $ref: '#/components/parameters/StatsTo'
+        - $ref: '#/components/parameters/StatsGroupBy'
+      responses:
+        '200':
+          description: Order trend statistics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StatsTrend'
+
+  /admin/stats/orders/status-breakdown:
+    get:
+      tags: [Stats]
+      summary: Get order status breakdown
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StatsFrom'
+        - $ref: '#/components/parameters/StatsTo'
+      responses:
+        '200':
+          description: Order status breakdown
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StatsStatusBreakdown'
+
+  /admin/stats/products/top-selling:
+    get:
+      tags: [Stats]
+      summary: Get top selling products
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StatsFrom'
+        - $ref: '#/components/parameters/StatsTo'
+        - $ref: '#/components/parameters/StatsLimit'
+      responses:
+        '200':
+          description: Top selling products
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TopSellingProduct'
+
+  /admin/stats/customers/top-spenders:
+    get:
+      tags: [Stats]
+      summary: Get top spending customers
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StatsFrom'
+        - $ref: '#/components/parameters/StatsTo'
+        - $ref: '#/components/parameters/StatsLimit'
+      responses:
+        '200':
+          description: Top spending customers
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TopSpender'
+
+  /admin/stats/reviews/summary:
+    get:
+      tags: [Stats]
+      summary: Get review rating summary
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StatsFrom'
+        - $ref: '#/components/parameters/StatsTo'
+        - $ref: '#/components/parameters/StatsProductId'
+      responses:
+        '200':
+          description: Review summary statistics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StatsRatingSummary'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1352,6 +1492,46 @@ components:
         minimum: 1
         maximum: 100
         default: 10
+
+    StatsFrom:
+      name: from
+      in: query
+      schema:
+        type: string
+        format: date
+      description: Start date for the stats range
+
+    StatsTo:
+      name: to
+      in: query
+      schema:
+        type: string
+        format: date
+      description: End date for the stats range
+
+    StatsGroupBy:
+      name: groupBy
+      in: query
+      schema:
+        type: string
+        enum: [day, week, month]
+        default: day
+
+    StatsLimit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+
+    StatsProductId:
+      name: productId
+      in: query
+      schema:
+        type: integer
+        minimum: 1
 
     Q:
       name: q
@@ -1899,6 +2079,127 @@ components:
       properties:
         productId:
           type: integer
+        averageRating:
+          type: number
+          format: float
+        totalReviews:
+          type: integer
+        ratingDistribution:
+          $ref: '#/components/schemas/RatingDistribution'
+
+    StatsOverview:
+      type: object
+      properties:
+        totalRevenue:
+          type: number
+        totalOrders:
+          type: integer
+        paidOrders:
+          type: integer
+        uniqueCustomers:
+          type: integer
+        totalItemsSold:
+          type: integer
+        totalReviews:
+          type: integer
+        averageRating:
+          type: number
+        newCustomers:
+          type: integer
+
+    StatsTrendPoint:
+      type: object
+      properties:
+        period:
+          type: string
+          description: ISO date representing the bucket boundary
+        totalOrders:
+          type: integer
+        paidOrders:
+          type: integer
+        totalRevenue:
+          type: number
+        totalItemsSold:
+          type: integer
+
+    StatsTrend:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+          nullable: true
+        to:
+          type: string
+          format: date-time
+          nullable: true
+        groupBy:
+          type: string
+          enum: [day, week, month]
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatsTrendPoint'
+
+    StatsStatusBreakdownItem:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, shipping, delivered, reviewed, cancelled]
+        count:
+          type: integer
+        percentage:
+          type: number
+          format: float
+
+    StatsStatusBreakdown:
+      type: object
+      properties:
+        totalOrders:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatsStatusBreakdownItem'
+
+    TopSellingProduct:
+      type: object
+      properties:
+        productId:
+          type: integer
+        productName:
+          type: string
+        variantId:
+          type: integer
+        variantName:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        quantitySold:
+          type: integer
+        revenue:
+          type: number
+
+    TopSpender:
+      type: object
+      properties:
+        accountId:
+          type: integer
+        phoneNum:
+          type: string
+        totalSpent:
+          type: number
+        totalOrders:
+          type: integer
+
+    StatsRatingSummary:
+      type: object
+      properties:
+        productId:
+          type: integer
+          nullable: true
         averageRating:
           type: number
           format: float
