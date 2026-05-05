@@ -21,6 +21,7 @@ import momoRouter from './module/payment2/routers/momo';
 import zalopayRouter from './module/payment2/routers/zalopay';
 import { cartModule } from './module/cart/module';
 import { userModule } from './module/user/module';
+import { statsModule } from './module/stats/module';
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use(`${config.app.apiPrefix}/${config.app.apiVersion}/payment`, zalopayRoute
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, reviewModule.router);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, cartModule.router);
 app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, userModule.router);
+app.use(`${config.app.apiPrefix}/${config.app.apiVersion}`, statsModule.router);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
