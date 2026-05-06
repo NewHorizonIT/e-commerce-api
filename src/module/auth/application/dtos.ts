@@ -43,3 +43,27 @@ export interface AuthSessionInfoDTO {
   phoneNum: string;
   role: 'admin' | 'user';
 }
+
+export interface LockUnlockAccountDTO {
+  accountId: number;
+  isLocked: boolean;
+}
+
+export interface ResetPasswordDTO {
+  accountId: number;
+}
+
+export interface UpdateAccountDTO {
+  accountId: number;
+  phoneNum?: string;
+  password?: string;
+  role?: 'admin' | 'user';
+}
+
+export interface AdminAccountResponseDTO {
+  id: number;
+  phoneNum: string;
+  role: 'admin' | 'user';
+  isLocked: boolean;
+  createdDate: Date | null;
+}

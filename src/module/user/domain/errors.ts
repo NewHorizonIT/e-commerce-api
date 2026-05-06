@@ -9,3 +9,12 @@ export class ShippingAddressNotFoundError extends NotFoundError {
     });
   }
 }
+
+export class NotFoundAccountError extends NotFoundError {
+  constructor(accountId: number) {
+    super('Account not found', {
+      accountId,
+      code: 'USER_ACCOUNT_NOT_FOUND',
+    });
+  }
+}

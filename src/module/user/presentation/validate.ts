@@ -45,6 +45,31 @@ export const updateShippingAddressSchema = z
     'At least one field is required'
   );
 
+export const accountIdParamSchema = z.object({
+  accountId: commonIdSchema,
+});
+
+export const adminCreatePersonalInformationSchema = z.object({
+  accountId: commonIdSchema,
+  name: z.string().trim().min(1).max(255),
+  avatarUrl: z.string().trim().max(255).nullable().optional(),
+  gender: z.boolean().nullable().optional(),
+  birth: z.coerce.date().nullable().optional(),
+});
+
+export const adminUpdatePersonalInformationSchema = z
+  .object({
+    accountId: commonIdSchema,
+    name: z.string().trim().min(1).max(255).optional(),
+    avatarUrl: z.string().trim().max(255).nullable().optional(),
+    gender: z.boolean().nullable().optional(),
+    birth: z.coerce.date().nullable().optional(),
+  })
+  .refine(
+    (data) => Object.values(data).some((value) => value !== undefined && value !== data.accountId),
+    'At least one field (other than accountId) is required'
+  );
+
 type SchemaMap = {
   body?: z.ZodTypeAny;
   params?: z.ZodTypeAny;

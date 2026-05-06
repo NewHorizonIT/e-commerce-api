@@ -77,8 +77,16 @@ class Account {
     this.isLocked = true;
   }
 
+  public unlockAccount() {
+    this.isLocked = false;
+  }
+
   public updatePassword(passwordHash: string): void {
     this.password = passwordHash;
+  }
+
+  public setRole(role: 'admin' | 'user'): void {
+    this.role = role;
   }
 
   // Getters and setters

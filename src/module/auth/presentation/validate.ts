@@ -34,6 +34,19 @@ export function validateBody<T>(schema: z.ZodType<T>): RequestHandler {
   };
 }
 
+export function validateQuery<T>(schema: z.ZodType<T>): RequestHandler {
+  return (req, _res, next) => {
+    const result = schema.safeParse(req.query);
+
+    if (!result.success) {
+      return next(new BadRequestError('Request query validation failed', result.error.flatten()));
+    }
+
+    (req as any).validatedQuery = result.data;
+    return next();
+  };
+}
+
 export const requireRefreshTokenCookie: RequestHandler = (req, _res, next) => {
   const refreshToken = req.cookies?.refreshToken;
 
@@ -43,3 +56,24 @@ export const requireRefreshTokenCookie: RequestHandler = (req, _res, next) => {
 
   return next();
 };
+
+export const lockUnlockSchema = z.object({
+  accountId: z.number().int().positive('accountId must be a positive integer'),
+  isLocked: z.boolean(),
+});
+
+export const resetPasswordSchema = z.object({
+  accountId: z.number().int().positive('accountId must be a positive integer'),
+});
+
+export const updateAccountSchema = z.object({
+  accountId: z.number().int().positive('accountId must be a positive integer'),
+  phoneNum: phoneNumberSchema.optional(),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/\d/, 'Password must include at least one number')
+    .regex(/[a-zA-Z]/, 'Password must include at least one letter')
+    .optional(),
+  role: z.enum(['admin', 'user']).optional(),
+});

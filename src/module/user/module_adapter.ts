@@ -7,6 +7,8 @@ import ListShippingAddressesUseCase from './application/usecase/listShippingAddr
 import CreateShippingAddressUseCase from './application/usecase/createShippingAddress';
 import UpdateShippingAddressUseCase from './application/usecase/updateShippingAddress';
 import DeleteShippingAddressUseCase from './application/usecase/deleteShippingAddress';
+import AdminCreatePersonalInformationUseCase from './application/usecase/adminCreatePersonalInformation';
+import AdminUpdatePersonalInformationUseCase from './application/usecase/adminUpdatePersonalInformation';
 import {
   CreateShippingAddressDTO,
   PersonalInformationDTO,
@@ -14,6 +16,9 @@ import {
   UpdateShippingAddressDTO,
   UpsertPersonalInformationDTO,
   UserProfileDTO,
+  AdminCreatePersonalInformationDTO,
+  AdminUpdatePersonalInformationDTO,
+  AdminUserProfileDTO,
 } from './application/dtos';
 
 @injectable()
@@ -30,7 +35,11 @@ export class UserModuleAdapter implements IUserModulePort {
     @inject(UpdateShippingAddressUseCase)
     private readonly updateShippingAddressUseCase: UpdateShippingAddressUseCase,
     @inject(DeleteShippingAddressUseCase)
-    private readonly deleteShippingAddressUseCase: DeleteShippingAddressUseCase
+    private readonly deleteShippingAddressUseCase: DeleteShippingAddressUseCase,
+    @inject(AdminCreatePersonalInformationUseCase)
+    private readonly adminCreatePersonalInformationUseCase: AdminCreatePersonalInformationUseCase,
+    @inject(AdminUpdatePersonalInformationUseCase)
+    private readonly adminUpdatePersonalInformationUseCase: AdminUpdatePersonalInformationUseCase
   ) {}
 
   getCurrentProfile(accountId: number): Promise<UserProfileDTO> {
@@ -65,5 +74,21 @@ export class UserModuleAdapter implements IUserModulePort {
 
   deleteShippingAddress(accountId: number, addressId: number): Promise<void> {
     return this.deleteShippingAddressUseCase.execute(accountId, addressId);
+  }
+
+  async getAdminUserProfile(accountId: number): Promise<AdminUserProfileDTO> {
+    return this.getCurrentProfileUseCase.execute(accountId);
+  }
+
+  adminCreatePersonalInformation(
+    dto: AdminCreatePersonalInformationDTO
+  ): Promise<PersonalInformationDTO> {
+    return this.adminCreatePersonalInformationUseCase.execute(dto);
+  }
+
+  adminUpdatePersonalInformation(
+    dto: AdminUpdatePersonalInformationDTO
+  ): Promise<PersonalInformationDTO> {
+    return this.adminUpdatePersonalInformationUseCase.execute(dto);
   }
 }

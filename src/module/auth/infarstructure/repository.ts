@@ -47,4 +47,12 @@ export class TypeORMAccountRepository implements IAccountRepository {
     const entity = await this.repo.findOne({ where: { id } });
     return entity ? AccountMapper.toDomain(entity) : null;
   }
+
+  async lockAccount(id: number): Promise<void> {
+    await this.repo.update({ id }, { isLocked: true });
+  }
+
+  async unlockAccount(id: number): Promise<void> {
+    await this.repo.update({ id }, { isLocked: false });
+  }
 }

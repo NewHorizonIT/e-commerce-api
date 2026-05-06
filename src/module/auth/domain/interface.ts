@@ -16,4 +16,6 @@ export interface IAccountRepository {
   save(account: Account): Promise<Account>;
   findByPhoneNum(phoneNum: PhoneNumber): Promise<Account | null>;
   updatePassword(id: number, newPassword: string): Promise<void>;
+  lockAccount(id: number): Promise<void>;
+  unlockAccount(id: number): Promise<void>;
 }

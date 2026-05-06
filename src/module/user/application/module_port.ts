@@ -5,6 +5,9 @@ import {
   UpsertPersonalInformationDTO,
   UpdateShippingAddressDTO,
   UserProfileDTO,
+  AdminCreatePersonalInformationDTO,
+  AdminUpdatePersonalInformationDTO,
+  AdminUserProfileDTO,
 } from './dtos';
 
 export interface IUserModulePort {
@@ -24,4 +27,12 @@ export interface IUserModulePort {
     dto: UpdateShippingAddressDTO
   ): Promise<ShippingAddressDTO>;
   deleteShippingAddress(accountId: number, addressId: number): Promise<void>;
+  // Admin endpoints
+  getAdminUserProfile(accountId: number): Promise<AdminUserProfileDTO>;
+  adminCreatePersonalInformation(
+    dto: AdminCreatePersonalInformationDTO
+  ): Promise<PersonalInformationDTO>;
+  adminUpdatePersonalInformation(
+    dto: AdminUpdatePersonalInformationDTO
+  ): Promise<PersonalInformationDTO>;
 }

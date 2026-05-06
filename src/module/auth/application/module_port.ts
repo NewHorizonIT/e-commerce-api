@@ -1,6 +1,6 @@
 // Define interface for method of port
 
-import { AuthAccountDTO, AuthSessionDTO, AuthSessionInfoDTO, CreateAccountDTO } from './dtos';
+import { AuthAccountDTO, AuthSessionDTO, AuthSessionInfoDTO, CreateAccountDTO, LockUnlockAccountDTO, ResetPasswordDTO, UpdateAccountDTO, AdminAccountResponseDTO } from './dtos';
 
 export interface IRefreshTokenStore {
   save(accountId: number, refreshToken: string): Promise<void>;
@@ -15,4 +15,8 @@ export interface IAuthModulePort {
   logout(refreshToken: string): Promise<void>;
   getAccountById(id: number): Promise<AuthAccountDTO | null>;
   getCurrentSession(userId: number): Promise<AuthSessionInfoDTO>;
+  lockAccount(dto: LockUnlockAccountDTO): Promise<AdminAccountResponseDTO>;
+  unlockAccount(dto: LockUnlockAccountDTO): Promise<AdminAccountResponseDTO>;
+  resetPassword(dto: ResetPasswordDTO): Promise<AdminAccountResponseDTO>;
+  updateAccount(dto: UpdateAccountDTO): Promise<AdminAccountResponseDTO>;
 }
