@@ -79,4 +79,24 @@ export class AuthController {
     const session = await this.authModulePort.getCurrentSession(req.userId!);
     new SuccessResponse(session, undefined, StatusCode.OK).send(res);
   }
+
+  async lockAccount(req: Request, res: Response): Promise<void> {
+    const result = await this.authModulePort.lockAccount(req.body);
+    new SuccessResponse(result, 'Account locked successfully', StatusCode.OK).send(res);
+  }
+
+  async unlockAccount(req: Request, res: Response): Promise<void> {
+    const result = await this.authModulePort.unlockAccount(req.body);
+    new SuccessResponse(result, 'Account unlocked successfully', StatusCode.OK).send(res);
+  }
+
+  async resetPassword(req: Request, res: Response): Promise<void> {
+    const result = await this.authModulePort.resetPassword(req.body);
+    new SuccessResponse(result, 'Password reset to default successfully', StatusCode.OK).send(res);
+  }
+
+  async updateAccount(req: Request, res: Response): Promise<void> {
+    const result = await this.authModulePort.updateAccount(req.body);
+    new SuccessResponse(result, 'Account updated successfully', StatusCode.OK).send(res);
+  }
 }

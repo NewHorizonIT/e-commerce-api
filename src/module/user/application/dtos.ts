@@ -48,3 +48,25 @@ export interface UpdateShippingAddressDTO {
   receiverName?: string;
   receiverPhone?: string;
 }
+
+export interface AdminCreatePersonalInformationDTO {
+  accountId: number;
+  name: string;
+  avatarUrl?: string | null;
+  gender?: boolean | null;
+  birth?: Date | null;
+}
+
+export interface AdminUpdatePersonalInformationDTO {
+  accountId: number;
+  name?: string;
+  avatarUrl?: string | null;
+  gender?: boolean | null;
+  birth?: Date | null;
+}
+
+export interface AdminUserProfileDTO {
+  accountId: number;
+  personalInformation: PersonalInformationDTO | null;
+  shippingAddresses: ShippingAddressDTO[];
+}

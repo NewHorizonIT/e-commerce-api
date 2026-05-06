@@ -15,6 +15,7 @@ import { GetOrdersStatusBreakdownUseCase } from './application/usecase/get-order
 import { GetTopSellingProductsUseCase } from './application/usecase/get-top-selling-products';
 import { GetTopSpendersUseCase } from './application/usecase/get-top-spenders';
 import { GetReviewSummaryUseCase } from './application/usecase/get-review-summary';
+import { GetOrdersRevenueByStatusUseCase } from './application/usecase/get-orders-revenue-by-status';
 import { STATS_TOKENS } from './tokens';
 
 @injectable()
@@ -26,6 +27,8 @@ export class StatsModuleAdapter implements IStatsModulePort {
     private readonly getOrdersTrendUseCase: GetOrdersTrendUseCase,
     @inject(STATS_TOKENS.getOrdersStatusBreakdown)
     private readonly getOrdersStatusBreakdownUseCase: GetOrdersStatusBreakdownUseCase,
+    @inject(STATS_TOKENS.getOrdersRevenueByStatus)
+    private readonly getOrdersRevenueByStatusUseCase: GetOrdersRevenueByStatusUseCase,
     @inject(STATS_TOKENS.getTopSellingProducts)
     private readonly getTopSellingProductsUseCase: GetTopSellingProductsUseCase,
     @inject(STATS_TOKENS.getTopSpenders)
@@ -44,6 +47,10 @@ export class StatsModuleAdapter implements IStatsModulePort {
 
   getOrdersStatusBreakdown(query: StatsRangeQueryDTO): Promise<StatsStatusBreakdownDTO> {
     return this.getOrdersStatusBreakdownUseCase.execute(query);
+  }
+
+  getOrdersRevenueByStatus(query: StatsRangeQueryDTO): Promise<import('./application/dtos').StatsRevenueByStatusDTO> {
+    return this.getOrdersRevenueByStatusUseCase.execute(query);
   }
 
   getTopSellingProducts(query: StatsRangeQueryDTO): Promise<TopSellingProductDTO[]> {

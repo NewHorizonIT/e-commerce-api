@@ -6,6 +6,7 @@ import { StatsController } from './presentation/controller';
 import { GetOverviewUseCase } from './application/usecase/get-overview';
 import { GetOrdersTrendUseCase } from './application/usecase/get-orders-trend';
 import { GetOrdersStatusBreakdownUseCase } from './application/usecase/get-orders-status-breakdown';
+import { GetOrdersRevenueByStatusUseCase } from './application/usecase/get-orders-revenue-by-status';
 import { GetTopSellingProductsUseCase } from './application/usecase/get-top-selling-products';
 import { GetTopSpendersUseCase } from './application/usecase/get-top-spenders';
 import { GetReviewSummaryUseCase } from './application/usecase/get-review-summary';
@@ -18,6 +19,7 @@ export function registerStatsDependencies(container: DependencyContainer): void 
     STATS_TOKENS.getOrdersStatusBreakdown,
     GetOrdersStatusBreakdownUseCase
   );
+  container.registerSingleton(STATS_TOKENS.getOrdersRevenueByStatus, GetOrdersRevenueByStatusUseCase);
   container.registerSingleton(STATS_TOKENS.getTopSellingProducts, GetTopSellingProductsUseCase);
   container.registerSingleton(STATS_TOKENS.getTopSpenders, GetTopSpendersUseCase);
   container.registerSingleton(STATS_TOKENS.getReviewSummary, GetReviewSummaryUseCase);

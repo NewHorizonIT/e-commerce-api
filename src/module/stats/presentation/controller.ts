@@ -47,6 +47,11 @@ export class StatsController {
     new SuccessResponse(summary, undefined, StatusCode.OK).send(res);
   }
 
+  async getOrdersRevenueByStatus(req: Request, res: Response): Promise<void> {
+    const revenue = await this.statsModulePort.getOrdersRevenueByStatus(this.parseQuery(req.query));
+    new SuccessResponse(revenue, undefined, StatusCode.OK).send(res);
+  }
+
   private parseQuery(query: Request['query']): StatsRangeQueryDTO {
     const rawQuery = query as Record<string, unknown>;
     const from = rawQuery.from;

@@ -86,4 +86,40 @@ export class UserController {
 
     res.status(204).send();
   }
+
+  async getAdminUserProfile(req: Request, res: Response): Promise<void> {
+    const { accountId } = req.params as { accountId: string };
+    const profile = await this.userModulePort.getAdminUserProfile(Number(accountId));
+    new SuccessResponse(profile, undefined, StatusCode.OK).send(res);
+  }
+
+  async adminCreatePersonalInformation(req: Request, res: Response): Promise<void> {
+    const personalInformation = await this.userModulePort.adminCreatePersonalInformation(req.body);
+
+    appLogger.info('Admin created personal information', {
+      personalInformationId: personalInformation.id,
+      accountId: personalInformation.accountId,
+    });
+
+    new SuccessResponse(
+      personalInformation,
+      'Personal information created successfully',
+      StatusCode.CREATED
+    ).send(res);
+  }
+
+  async adminUpdatePersonalInformation(req: Request, res: Response): Promise<void> {
+    const personalInformation = await this.userModulePort.adminUpdatePersonalInformation(req.body);
+
+    appLogger.info('Admin updated personal information', {
+      personalInformationId: personalInformation.id,
+      accountId: personalInformation.accountId,
+    });
+
+    new SuccessResponse(
+      personalInformation,
+      'Personal information updated successfully',
+      StatusCode.OK
+    ).send(res);
+  }
 }

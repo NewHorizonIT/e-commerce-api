@@ -190,6 +190,71 @@ export class TypeORMStatsRepository implements IStatsRepository {
     };
   }
 
+  async getOrdersRevenueByStatus(
+    query: StatsRangeQueryDTO
+  ): Promise<import('../application/dtos').StatsRevenueByStatusDTO> {
+    const orderFilters = this.buildRangeClause('o.order_date', query.from, query.to);
+
+    const rows = (await AppDataSource.query(
+      `
+        SELECT
+          o.status AS status,
+          COUNT(*)::int AS count,
+          COALESCE(SUM(o.total_amount), 0) AS total_amount,
+          COALESCE(SUM(CASE WHEN o.is_paid THEN o.total_amount ELSE 0 END), 0) AS paid_amount
+        FROM orders o
+        WHERE 1=1${orderFilters.clause}
+        GROUP BY o.status
+      `,
+      orderFilters.params
+    )) as Array<{
+      status: string;
+      count: string;
+      total_amount: string;
+      paid_amount: string;
+    }>;
+
+    const map = new Map<string, { count: number; totalAmount: number; paidAmount: number }>();
+    for (const row of rows) {
+      map.set(String(row.status), {
+        count: this.toNumber(row.count),
+        totalAmount: this.toNumber(row.total_amount),
+        paidAmount: this.toNumber(row.paid_amount),
+      });
+    }
+
+    const items = [
+      ORDER_STATUS_VALUE.PENDING,
+      ORDER_STATUS_VALUE.CONFIRMED,
+      ORDER_STATUS_VALUE.SHIPPING,
+      ORDER_STATUS_VALUE.DELIVERED,
+      ORDER_STATUS_VALUE.REVIEWED,
+      ORDER_STATUS_VALUE.CANCELLED,
+    ].map((status) => {
+      const data = map.get(status) ?? { count: 0, totalAmount: 0, paidAmount: 0 };
+
+      return {
+        status,
+        count: data.count,
+        percentage: 0,
+        totalAmount: data.totalAmount,
+        paidAmount: data.paidAmount,
+      };
+    });
+
+    const totalOrders = items.reduce((s, it) => s + it.count, 0);
+    const totalAmount = items.reduce((s, it) => s + it.totalAmount, 0);
+
+    return {
+      totalOrders,
+      totalAmount,
+      items: items.map((item) => ({
+        ...item,
+        percentage: totalOrders > 0 ? Number(((item.count / totalOrders) * 100).toFixed(2)) : 0,
+      })),
+    };
+  }
+
   async getTopSellingProducts(query: StatsRangeQueryDTO): Promise<TopSellingProductDTO[]> {
     const limit = this.normalizeLimit(query.limit);
     const orderFilters = this.buildRangeClause('o.order_date', query.from, query.to);

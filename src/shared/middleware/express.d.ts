@@ -5,6 +5,7 @@ declare global {
     interface Request {
       userId?: number;
       userRole?: 'admin' | 'user';
+      validatedQuery?: any;
     }
   }
 }

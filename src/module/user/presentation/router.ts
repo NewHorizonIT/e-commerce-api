@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authenticate from '@/shared/middleware/authenticate';
+import authorizeRole from '@/shared/middleware/authorizeRole';
 import { UserController } from './controller';
 import {
   addressIdParamSchema,
@@ -7,6 +8,9 @@ import {
   updateShippingAddressSchema,
   upsertPersonalInformationSchema,
   validateRequest,
+  accountIdParamSchema,
+  adminCreatePersonalInformationSchema,
+  adminUpdatePersonalInformationSchema,
 } from './validate';
 
 export function createUserRouter(controller: UserController): Router {
@@ -41,6 +45,31 @@ export function createUserRouter(controller: UserController): Router {
     authenticate,
     validateRequest({ params: addressIdParamSchema }),
     controller.deleteShippingAddress.bind(controller)
+  );
+
+  // Admin endpoints
+  userRouter.get(
+    '/admin/users/:accountId',
+    authenticate,
+    authorizeRole('admin'),
+    validateRequest({ params: accountIdParamSchema }),
+    controller.getAdminUserProfile.bind(controller)
+  );
+
+  userRouter.post(
+    '/admin/users',
+    authenticate,
+    authorizeRole('admin'),
+    validateRequest({ body: adminCreatePersonalInformationSchema }),
+    controller.adminCreatePersonalInformation.bind(controller)
+  );
+
+  userRouter.patch(
+    '/admin/users/personal-information',
+    authenticate,
+    authorizeRole('admin'),
+    validateRequest({ body: adminUpdatePersonalInformationSchema }),
+    controller.adminUpdatePersonalInformation.bind(controller)
   );
 
   return userRouter;

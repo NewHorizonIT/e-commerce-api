@@ -8,4 +8,8 @@ export const AUTH_TOKENS = {
   RefreshTokenUseCase: 'RefreshTokenUseCase',
   LogoutUseCase: 'LogoutUseCase',
   GetCurrentSessionUseCase: 'GetCurrentSessionUseCase',
+  LockAccountUseCase: 'LockAccountUseCase',
+  UnlockAccountUseCase: 'UnlockAccountUseCase',
+  ResetPasswordUseCase: 'ResetPasswordUseCase',
+  UpdateAccountUseCase: 'UpdateAccountUseCase',
 } as const;

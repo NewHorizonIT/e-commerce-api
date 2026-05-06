@@ -32,6 +32,14 @@ export function createStatsRouter(controller: StatsController): Router {
   );
 
   router.get(
+    '/admin/stats/orders/revenue-by-status',
+    authenticate,
+    authorizeRole('admin'),
+    validateRequest({ query: statsRangeSchema }),
+    controller.getOrdersRevenueByStatus.bind(controller)
+  );
+
+  router.get(
     '/admin/stats/products/top-selling',
     authenticate,
     authorizeRole('admin'),

@@ -46,6 +46,20 @@ export interface StatsStatusBreakdownDTO {
   items: StatsStatusBreakdownItemDTO[];
 }
 
+export interface StatsRevenueByStatusItemDTO {
+  status: OrderStatus;
+  count: number;
+  percentage: number;
+  totalAmount: number;
+  paidAmount: number;
+}
+
+export interface StatsRevenueByStatusDTO {
+  totalOrders: number;
+  totalAmount: number;
+  items: StatsRevenueByStatusItemDTO[];
+}
+
 export interface TopSellingProductDTO {
   productId: number;
   productName: string;

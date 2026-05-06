@@ -137,6 +137,184 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /auth/lock-user:
+    patch:
+      tags: [Auth]
+      summary: Lock/unlock user account (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockUnlockAccountRequest'
+      responses:
+        '200':
+          description: Account lock status updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminAccountResponse'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized or not admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/unlock-user:
+    patch:
+      tags: [Auth]
+      summary: Unlock user account (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockUnlockAccountRequest'
+      responses:
+        '200':
+          description: Account unlocked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminAccountResponse'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized or not admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/reset-password:
+    patch:
+      tags: [Auth]
+      summary: Reset user password to default (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset to default
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminAccountResponse'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized or not admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/account:
+    patch:
+      tags: [Auth]
+      summary: Update account information (admin or account owner)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAccountRequest'
+      responses:
+        '200':
+          description: Account updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminAccountResponse'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Phone number already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /users/me:
     get:
       tags: [User]
@@ -261,6 +439,124 @@ paths:
       responses:
         '204':
           description: Shipping address deleted
+
+  /admin/users/{accountId}:
+    get:
+      tags: [User]
+      summary: Get user profile by account ID (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Unauthorized or not admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/users:
+    post:
+      tags: [User]
+      summary: Create/upsert user personal information (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreatePersonalInformationRequest'
+      responses:
+        '201':
+          description: Personal information created/updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PersonalInformation'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized or not admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/users/personal-information:
+    patch:
+      tags: [User]
+      summary: Update user personal information (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdatePersonalInformationRequest'
+      responses:
+        '200':
+          description: Personal information updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PersonalInformation'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized or not admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /products:
     get:
@@ -1394,6 +1690,28 @@ paths:
                       data:
                         $ref: '#/components/schemas/StatsStatusBreakdown'
 
+  /admin/stats/orders/revenue-by-status:
+    get:
+      tags: [Stats]
+      summary: Get order revenue and counts grouped by status
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StatsFrom'
+        - $ref: '#/components/parameters/StatsTo'
+      responses:
+        '200':
+          description: Order revenue grouped by status
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StatsRevenueByStatus'
+
   /admin/stats/products/top-selling:
     get:
       tags: [Stats]
@@ -1738,6 +2056,61 @@ components:
         password:
           type: string
 
+    LockUnlockAccountRequest:
+      type: object
+      required: [accountId, isLocked]
+      properties:
+        accountId:
+          type: integer
+          minimum: 1
+        isLocked:
+          type: boolean
+
+    ResetPasswordRequest:
+      type: object
+      required: [accountId]
+      properties:
+        accountId:
+          type: integer
+          minimum: 1
+
+    UpdateAccountRequest:
+      type: object
+      required: [accountId]
+      properties:
+        accountId:
+          type: integer
+          minimum: 1
+        phoneNum:
+          type: string
+          pattern: '^\\d{10,15}$'
+          nullable: true
+        password:
+          type: string
+          minLength: 8
+          nullable: true
+        role:
+          type: string
+          enum: [admin, user]
+          nullable: true
+
+    AdminAccountResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        phoneNum:
+          type: string
+        role:
+          type: string
+          enum: [admin, user]
+        isLocked:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
+          nullable: true
+
     AuthSessionData:
       type: object
       properties:
@@ -1888,6 +2261,50 @@ components:
         receiverPhone:
           type: string
           pattern: '^\\d{10,15}$'
+
+    AdminCreatePersonalInformationRequest:
+      type: object
+      required: [accountId, name]
+      properties:
+        accountId:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+          maxLength: 255
+        avatarUrl:
+          type: string
+          maxLength: 255
+          nullable: true
+        gender:
+          type: boolean
+          nullable: true
+        birth:
+          type: string
+          format: date
+          nullable: true
+
+    AdminUpdatePersonalInformationRequest:
+      type: object
+      required: [accountId]
+      properties:
+        accountId:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+          maxLength: 255
+        avatarUrl:
+          type: string
+          maxLength: 255
+          nullable: true
+        gender:
+          type: boolean
+          nullable: true
+        birth:
+          type: string
+          format: date
+          nullable: true
 
     Category:
       type: object
@@ -2164,6 +2581,34 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StatsStatusBreakdownItem'
+
+    StatsRevenueByStatusItem:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, shipping, delivered, reviewed, cancelled]
+        count:
+          type: integer
+        percentage:
+          type: number
+          format: float
+        totalAmount:
+          type: number
+        paidAmount:
+          type: number
+
+    StatsRevenueByStatus:
+      type: object
+      properties:
+        totalOrders:
+          type: integer
+        totalAmount:
+          type: number
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatsRevenueByStatusItem'
 
     TopSellingProduct:
       type: object
