@@ -49,6 +49,11 @@ export const accountIdParamSchema = z.object({
   accountId: commonIdSchema,
 });
 
+export const listUsersQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+});
+
 export const adminCreatePersonalInformationSchema = z.object({
   accountId: commonIdSchema,
   name: z.string().trim().min(1).max(255),
@@ -72,6 +77,7 @@ export const adminUpdatePersonalInformationSchema = z
 
 type SchemaMap = {
   body?: z.ZodTypeAny;
+  query?: z.ZodTypeAny;
   params?: z.ZodTypeAny;
 };
 
@@ -92,6 +98,11 @@ export function validateRequest(schemaMap: SchemaMap): RequestHandler {
       if (schemaMap.params) {
         const parsedParams = schemaMap.params.parse(req.params) as Record<string, unknown>;
         replaceObjectValues(req.params as unknown as Record<string, unknown>, parsedParams);
+      }
+
+      if (schemaMap.query) {
+        const parsedQuery = schemaMap.query.parse(req.query) as Record<string, unknown>;
+        replaceObjectValues(req.query as unknown as Record<string, unknown>, parsedQuery);
       }
 
       if (schemaMap.body) {

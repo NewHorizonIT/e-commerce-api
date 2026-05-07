@@ -2,9 +2,11 @@ import { Router } from 'express';
 import { AuthController } from './controller';
 import {
   loginSchema,
+  listAccountsQuerySchema,
   registerSchema,
   requireRefreshTokenCookie,
   validateBody,
+  validateQuery,
   lockUnlockSchema,
   resetPasswordSchema,
   updateAccountSchema,
@@ -16,6 +18,13 @@ export function createAuthRouter(controller: AuthController): Router {
   const authRouter = Router();
 
   authRouter.post('/accounts', validateBody(registerSchema), controller.register.bind(controller));
+  authRouter.get(
+    '/accounts',
+    authenticate,
+    authorizeRole('admin'),
+    validateQuery(listAccountsQuerySchema),
+    controller.listAccounts.bind(controller)
+  );
   authRouter.post('/sessions', validateBody(loginSchema), controller.login.bind(controller));
   authRouter.post(
     '/sessions/refresh',

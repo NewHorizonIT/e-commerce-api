@@ -31,9 +31,44 @@ tags:
     description: Payment initiation and gateway callback APIs
   - name: Stats
     description: Admin statistics and dashboard APIs (requires admin role)
+  - name: Discount
+    description: Discount code management APIs (requires admin role)
 
 paths:
   /auth/accounts:
+    get:
+      tags: [Auth]
+      summary: List accounts (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Paginated account list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PaginatedAdminAccounts'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
     post:
       tags: [Auth]
       summary: Register account
@@ -479,6 +514,39 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
   /admin/users:
+    get:
+      tags: [User]
+      summary: List users (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Paginated user list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PaginatedAdminUsers'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
     post:
       tags: [User]
       summary: Create/upsert user personal information (admin only)
@@ -1785,6 +1853,318 @@ paths:
                       data:
                         $ref: '#/components/schemas/StatsRatingSummary'
 
+  /discounts:
+    get:
+      tags: [Discount]
+      summary: List discounts available to the current user
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [name, startTime, discountValue]
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: Paginated discount list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PaginatedDiscounts'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /discounts/code/{code}:
+    get:
+      tags: [Discount]
+      summary: Find discount by code
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/DiscountCode'
+      responses:
+        '200':
+          description: Discount detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DiscountDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Discount not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /discounts/check-validity:
+    post:
+      tags: [Discount]
+      summary: Validate a discount code for an order amount
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckDiscountValidityRequest'
+      responses:
+        '200':
+          description: Discount validity result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DiscountValidityResult'
+        '400':
+          description: Invalid request or discount is not valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/discounts:
+    get:
+      tags: [Discount]
+      summary: List discounts for admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [name, startTime, discountValue]
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: Paginated discount list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PaginatedDiscounts'
+        '401':
+          description: Unauthorized or not admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags: [Discount]
+      summary: Create discount
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDiscountRequest'
+      responses:
+        '201':
+          description: Discount created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DiscountDetail'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized or not admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/discounts/{discountId}:
+    get:
+      tags: [Discount]
+      summary: Get discount by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/DiscountId'
+      responses:
+        '200':
+          description: Discount detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DiscountDetail'
+        '401':
+          description: Unauthorized or not admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Discount not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      tags: [Discount]
+      summary: Update discount
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/DiscountId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDiscountRequest'
+      responses:
+        '200':
+          description: Discount updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DiscountDetail'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized or not admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Discount not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/discounts/{discountId}/active:
+    patch:
+      tags: [Discount]
+      summary: Activate or deactivate discount
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/DiscountId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDiscountActiveRequest'
+      responses:
+        '200':
+          description: Discount active state updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DiscountDetail'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized or not admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Discount not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1968,6 +2348,21 @@ components:
         type: integer
         minimum: 1
 
+    DiscountId:
+      name: discountId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+
+    DiscountCode:
+      name: code
+      in: path
+      required: true
+      schema:
+        type: string
+
   schemas:
     SuccessEnvelope:
       type: object
@@ -2110,6 +2505,55 @@ components:
           type: string
           format: date-time
           nullable: true
+
+    AdminUserSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        phoneNum:
+          type: string
+        role:
+          type: string
+          enum: [admin, user]
+        isLocked:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
+          nullable: true
+
+    PaginatedAdminUsers:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminUserSummary'
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+
+    PaginatedAdminAccounts:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminAccountResponse'
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
 
     AuthSessionData:
       type: object
@@ -3221,3 +3665,183 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CartItemDetail'
+
+    DiscountDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        discountCode:
+          type: string
+        type:
+          type: string
+          enum: [fixed, percentage]
+        discountValue:
+          type: number
+          minimum: 0
+        minimumOrderValue:
+          type: number
+          minimum: 0
+          nullable: true
+        maximumDiscount:
+          type: number
+          minimum: 0
+          nullable: true
+        maximumUsage:
+          type: integer
+          minimum: 0
+          nullable: true
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+        allowSaveBefore:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PaginatedDiscounts:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiscountDetail'
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+
+    CreateDiscountRequest:
+      type: object
+      required: [name, discountCode, type, discountValue, startTime, endTime]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        discountCode:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [fixed, percentage]
+        discountValue:
+          type: number
+          minimum: 0
+        minimumOrderValue:
+          type: number
+          minimum: 0
+          nullable: true
+        maximumDiscount:
+          type: number
+          minimum: 0
+          nullable: true
+        maximumUsage:
+          type: integer
+          minimum: 0
+          nullable: true
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+          default: true
+        allowSaveBefore:
+          type: boolean
+          default: true
+
+    UpdateDiscountRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        discountCode:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [fixed, percentage]
+        discountValue:
+          type: number
+          minimum: 0
+        minimumOrderValue:
+          type: number
+          minimum: 0
+          nullable: true
+        maximumDiscount:
+          type: number
+          minimum: 0
+          nullable: true
+        maximumUsage:
+          type: integer
+          minimum: 0
+          nullable: true
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+        allowSaveBefore:
+          type: boolean
+
+    UpdateDiscountActiveRequest:
+      type: object
+      required: [isActive]
+      properties:
+        isActive:
+          type: boolean
+
+    CheckDiscountValidityRequest:
+      type: object
+      required: [discountCode, orderAmount]
+      properties:
+        discountCode:
+          type: string
+          minLength: 1
+        orderAmount:
+          type: number
+          minimum: 0
+        currentDate:
+          type: string
+          format: date-time
+          nullable: true
+
+    DiscountValidityResult:
+      type: object
+      properties:
+        isValid:
+          type: boolean
+        discountAmount:
+          type: number
+          minimum: 0
+          nullable: true
+        finalAmount:
+          type: number
+          minimum: 0
+          nullable: true
+        message:
+          type: string
+          nullable: true

@@ -80,6 +80,13 @@ export class AuthController {
     new SuccessResponse(session, undefined, StatusCode.OK).send(res);
   }
 
+  async listAccounts(req: Request, res: Response): Promise<void> {
+    const accounts = await this.authModulePort.listAccounts(
+      req.validatedQuery as { page: number; limit: number }
+    );
+    new SuccessResponse(accounts, undefined, StatusCode.OK).send(res);
+  }
+
   async lockAccount(req: Request, res: Response): Promise<void> {
     const result = await this.authModulePort.lockAccount(req.body);
     new SuccessResponse(result, 'Account locked successfully', StatusCode.OK).send(res);

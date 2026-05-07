@@ -15,6 +15,11 @@ export interface CreateAccountDTO {
   role?: 'admin' | 'user';
 }
 
+export interface PaginationQueryDTO {
+  page: number;
+  limit: number;
+}
+
 export interface AuthSessionDTO {
   id: number;
   phoneNum: string;
@@ -66,4 +71,14 @@ export interface AdminAccountResponseDTO {
   role: 'admin' | 'user';
   isLocked: boolean;
   createdDate: Date | null;
+}
+
+export interface AccountListQueryDTO extends PaginationQueryDTO {}
+
+export interface PaginatedAdminAccountsDTO {
+  items: AdminAccountResponseDTO[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
 }

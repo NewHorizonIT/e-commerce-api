@@ -1,9 +1,11 @@
 import {
+  AccountListQueryDTO,
   AuthAccountDTO,
   AuthSessionDTO,
   AuthSessionInfoDTO,
   CreateAccountDTO,
   LockUnlockAccountDTO,
+  PaginatedAdminAccountsDTO,
   ResetPasswordDTO,
   UpdateAccountDTO,
   AdminAccountResponseDTO,
@@ -66,6 +68,10 @@ export class AuthModuleAdapter implements IAuthModulePort {
 
   getCurrentSession(userId: number): Promise<AuthSessionInfoDTO> {
     return this.getCurrentSessionUseCase.execute(userId);
+  }
+
+  listAccounts(query: AccountListQueryDTO): Promise<PaginatedAdminAccountsDTO> {
+    return this.accountRepository.listAccounts(query);
   }
 
   async getAccountById(id: number): Promise<AuthAccountDTO | null> {

@@ -10,6 +10,7 @@ import {
 export interface IOrderRepository {
   listOrders(query: OrderListQueryDTO): Promise<PaginatedOrdersDTO>;
   findOrderById(orderId: number): Promise<OrderDetailDTO | null>;
+  findFailedPaymentOrdersBeforeTime(cutoffTime: Date): Promise<OrderDetailDTO[]>;
 
   createOrder(dto: CreateOrderDTO): Promise<OrderDetailDTO>;
   updateOrderStatus(orderId: number, dto: UpdateOrderStatusDTO): Promise<OrderDetailDTO | null>;

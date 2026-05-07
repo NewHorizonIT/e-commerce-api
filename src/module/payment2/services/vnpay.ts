@@ -3,7 +3,7 @@ import { dateFormat, HashAlgorithm, ignoreLogger, ProductCode, VNPay, VnpLocale 
 import { TypeORMOrderRepository } from '@/module/order/infrastructure/repository';
 import { BadRequestError } from '@/shared/error/error';
 import { UpdateOrderPaymentDTO } from '@/module/order/application/dtos';
-import { PAYMENT_METHOD_VALUE } from '@/module/order/domain/value_objects';
+import { PAYMENT_METHOD_VALUE, PAYMENT_STATUS_VALUE } from '@/module/order/domain/value_objects';
 import { InitiatePaymentDTO } from '../dtos/initiate-payment';
 import { generatePayID } from '../utils/generate-pay-id';
 
@@ -35,6 +35,10 @@ export default class VnpayService {
     const orderSelected = await this.orderRepo.findOrderById(initiatePayment.getOrderId());
     if (!orderSelected) {
       throw new BadRequestError('Order not found');
+    }
+
+    if (orderSelected.isPaid) {
+      throw new BadRequestError('Order already paid');
     }
 
     const vnpay = new VNPay({
@@ -70,6 +74,12 @@ export default class VnpayService {
     const orderId = vnp_Params['vnp_TxnRef'].split('_')[1];
 
     if (responseCode !== '00') {
+      // Update payment status to failed
+      await this.orderRepo.updateOrderPayment(Number(orderId), {
+        isPaid: false,
+        paymentMethod: PAYMENT_METHOD_VALUE.VNPAY_WALLET,
+        paymentStatus: PAYMENT_STATUS_VALUE.FAILED,
+      } as UpdateOrderPaymentDTO);
       throw new BadRequestError('Unsuccess payment');
     }
 
@@ -84,6 +94,7 @@ export default class VnpayService {
     const orderUpdated = await this.orderRepo.updateOrderPayment(orderId, {
       isPaid: true,
       paymentMethod: PAYMENT_METHOD_VALUE.VNPAY_WALLET,
+      paymentStatus: PAYMENT_STATUS_VALUE.SUCCESS,
       bankTransferTime: new Date(),
       bankTransferTransactionCode: vnp_Params['vnp_TxnRef'],
     } as UpdateOrderPaymentDTO);

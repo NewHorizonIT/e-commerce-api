@@ -21,6 +21,11 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+export const listAccountsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+});
+
 export function validateBody<T>(schema: z.ZodType<T>): RequestHandler {
   return (req, _res, next) => {
     const result = schema.safeParse(req.body);

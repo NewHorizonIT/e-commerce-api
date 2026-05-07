@@ -4,6 +4,8 @@ import {
   OrderStatus,
   PAYMENT_METHOD_VALUE,
   PaymentMethod,
+  PAYMENT_STATUS_VALUE,
+  PaymentStatus,
 } from './value_objects';
 import {
   GreaterThanOrEqualZeroQuantityError,
@@ -34,6 +36,7 @@ export class Order {
     private discountAmount: number,
     private totalAmount: number,
     private isPaid: boolean,
+    private paymentStatus: PaymentStatus,
     private paymentMethod: PaymentMethod,
     private bankTransferTime: Date | null,
     private bankTransferTransactionCode: string | null,
@@ -83,6 +86,7 @@ export class Order {
       params.discountAmount ?? 0,
       0,
       false,
+      PAYMENT_STATUS_VALUE.PENDING,
       params.paymentMethod,
       null,
       null,
@@ -108,6 +112,7 @@ export class Order {
     discountAmount: number;
     totalAmount: number;
     isPaid: boolean;
+    paymentStatus: PaymentStatus;
     paymentMethod: PaymentMethod;
     bankTransferTime: Date | null;
     bankTransferTransactionCode: string | null;
@@ -127,6 +132,7 @@ export class Order {
       params.discountAmount,
       params.totalAmount,
       params.isPaid,
+      params.paymentStatus,
       params.paymentMethod,
       params.bankTransferTime,
       params.bankTransferTransactionCode,
@@ -207,6 +213,11 @@ export class Order {
     }
 
     this.isPaid = true;
+    this.paymentStatus = PAYMENT_STATUS_VALUE.SUCCESS;
+  }
+
+  markPaymentFailed() {
+    this.paymentStatus = PAYMENT_STATUS_VALUE.FAILED;
   }
 
   getId(): number | null {
@@ -239,6 +250,10 @@ export class Order {
 
   getIsPaid(): boolean {
     return this.isPaid;
+  }
+
+  getPaymentStatus(): PaymentStatus {
+    return this.paymentStatus;
   }
 
   getPaymentMethod(): PaymentMethod {

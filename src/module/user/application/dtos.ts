@@ -70,3 +70,24 @@ export interface AdminUserProfileDTO {
   personalInformation: PersonalInformationDTO | null;
   shippingAddresses: ShippingAddressDTO[];
 }
+
+export interface AdminUserSummaryDTO {
+  id: number;
+  phoneNum: string;
+  role: 'admin' | 'user';
+  isLocked: boolean;
+  createdDate: Date | null;
+}
+
+export interface AdminUserListQueryDTO {
+  page: number;
+  limit: number;
+}
+
+export interface PaginatedAdminUsersDTO {
+  items: AdminUserSummaryDTO[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}

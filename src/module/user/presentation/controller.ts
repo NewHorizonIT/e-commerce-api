@@ -93,6 +93,13 @@ export class UserController {
     new SuccessResponse(profile, undefined, StatusCode.OK).send(res);
   }
 
+  async listUsers(req: Request, res: Response): Promise<void> {
+    const users = await this.userModulePort.listUsers(
+      req.validatedQuery as { page: number; limit: number }
+    );
+    new SuccessResponse(users, undefined, StatusCode.OK).send(res);
+  }
+
   async adminCreatePersonalInformation(req: Request, res: Response): Promise<void> {
     const personalInformation = await this.userModulePort.adminCreatePersonalInformation(req.body);
 

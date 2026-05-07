@@ -1,4 +1,4 @@
-import { OrderStatus, PaymentMethod } from '../domain/value_objects';
+import { OrderStatus, PaymentMethod, PaymentStatus } from '../domain/value_objects';
 
 export interface PaginationQueryDTO {
   page: number;
@@ -23,6 +23,7 @@ export interface OrderSummaryDTO {
   discountAmount: number;
   totalAmount: number;
   isPaid: boolean;
+  paymentStatus: PaymentStatus;
 }
 
 export interface OrderItemDTO {
@@ -55,6 +56,7 @@ export interface OrderDetailDTO {
   discountAmount: number;
   totalAmount: number;
   isPaid: boolean;
+  paymentStatus: PaymentStatus;
   paymentMethod: PaymentMethod;
   bankTransferTime: string | null;
   bankTransferTransactionCode: string | null;
@@ -90,6 +92,7 @@ export interface CreateOrderDTO {
 
 export interface UpdateOrderPaymentDTO {
   isPaid: boolean;
+  paymentStatus: PaymentStatus;
   paymentMethod: PaymentMethod;
   bankTransferTime?: Date | null;
   bankTransferTransactionCode?: string | null;
