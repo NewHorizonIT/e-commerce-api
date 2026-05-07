@@ -12,6 +12,7 @@ import {
   OrderStatus,
   PAYMENT_METHOD_VALUE,
 } from '../src/module/order/domain/value_objects';
+import { PAYMENT_STATUS_VALUE } from '../src/module/order/domain/value_objects';
 import { DISCOUNT_TYPE_VALUE } from '../src/module/discount/domain/value_objects';
 
 async function seedOrder(): Promise<void> {
@@ -68,6 +69,18 @@ async function seedOrder(): Promise<void> {
 
     const randomItem = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
+    const inferPaymentStatus = (status: string): string => {
+      if (status === ORDER_STATUS_VALUE.PENDING) {
+        return PAYMENT_STATUS_VALUE.PENDING;
+      }
+
+      if (status === ORDER_STATUS_VALUE.CANCELLED) {
+        return PAYMENT_STATUS_VALUE.FAILED;
+      }
+
+      return PAYMENT_STATUS_VALUE.SUCCESS;
+    };
+
     /**
      * CREATE ORDERS WITH DIFFERENT STATES
      */
@@ -76,54 +89,156 @@ async function seedOrder(): Promise<void> {
         name: 'Pending Order',
         status: ORDER_STATUS_VALUE.PENDING,
         statusHistory: [
-          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
+          {
+            oldStatus: 'pending' as OrderStatus,
+            newStatus: ORDER_STATUS_VALUE.PENDING,
+            note: 'Order created',
+          },
         ],
+        paymentStatus: PAYMENT_STATUS_VALUE.PENDING,
       },
       {
         name: 'Confirmed Order',
         status: ORDER_STATUS_VALUE.CONFIRMED,
         statusHistory: [
-          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
-          { oldStatus: ORDER_STATUS_VALUE.PENDING, newStatus: ORDER_STATUS_VALUE.CONFIRMED, note: 'Order confirmed' },
+          {
+            oldStatus: 'pending' as OrderStatus,
+            newStatus: ORDER_STATUS_VALUE.PENDING,
+            note: 'Order created',
+          },
+          {
+            oldStatus: ORDER_STATUS_VALUE.PENDING,
+            newStatus: ORDER_STATUS_VALUE.CONFIRMED,
+            note: 'Order confirmed',
+          },
         ],
+        // Confirmed orders should be paid
+        paymentStatus: PAYMENT_STATUS_VALUE.SUCCESS,
       },
       {
         name: 'Shipping Order',
         status: ORDER_STATUS_VALUE.SHIPPING,
         statusHistory: [
-          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
-          { oldStatus: ORDER_STATUS_VALUE.PENDING, newStatus: ORDER_STATUS_VALUE.CONFIRMED, note: 'Order confirmed' },
-          { oldStatus: ORDER_STATUS_VALUE.CONFIRMED, newStatus: ORDER_STATUS_VALUE.SHIPPING, note: 'Order shipped' },
+          {
+            oldStatus: 'pending' as OrderStatus,
+            newStatus: ORDER_STATUS_VALUE.PENDING,
+            note: 'Order created',
+          },
+          {
+            oldStatus: ORDER_STATUS_VALUE.PENDING,
+            newStatus: ORDER_STATUS_VALUE.CONFIRMED,
+            note: 'Order confirmed',
+          },
+          {
+            oldStatus: ORDER_STATUS_VALUE.CONFIRMED,
+            newStatus: ORDER_STATUS_VALUE.SHIPPING,
+            note: 'Order shipped',
+          },
         ],
       },
       {
         name: 'Delivered Order',
         status: ORDER_STATUS_VALUE.DELIVERED,
         statusHistory: [
-          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
-          { oldStatus: ORDER_STATUS_VALUE.PENDING, newStatus: ORDER_STATUS_VALUE.CONFIRMED, note: 'Order confirmed' },
-          { oldStatus: ORDER_STATUS_VALUE.CONFIRMED, newStatus: ORDER_STATUS_VALUE.SHIPPING, note: 'Order shipped' },
-          { oldStatus: ORDER_STATUS_VALUE.SHIPPING, newStatus: ORDER_STATUS_VALUE.DELIVERED, note: 'Order delivered' },
+          {
+            oldStatus: 'pending' as OrderStatus,
+            newStatus: ORDER_STATUS_VALUE.PENDING,
+            note: 'Order created',
+          },
+          {
+            oldStatus: ORDER_STATUS_VALUE.PENDING,
+            newStatus: ORDER_STATUS_VALUE.CONFIRMED,
+            note: 'Order confirmed',
+          },
+          {
+            oldStatus: ORDER_STATUS_VALUE.CONFIRMED,
+            newStatus: ORDER_STATUS_VALUE.SHIPPING,
+            note: 'Order shipped',
+          },
+          {
+            oldStatus: ORDER_STATUS_VALUE.SHIPPING,
+            newStatus: ORDER_STATUS_VALUE.DELIVERED,
+            note: 'Order delivered',
+          },
         ],
       },
       {
         name: 'Reviewed Order',
         status: ORDER_STATUS_VALUE.REVIEWED,
         statusHistory: [
-          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
-          { oldStatus: ORDER_STATUS_VALUE.PENDING, newStatus: ORDER_STATUS_VALUE.CONFIRMED, note: 'Order confirmed' },
-          { oldStatus: ORDER_STATUS_VALUE.CONFIRMED, newStatus: ORDER_STATUS_VALUE.SHIPPING, note: 'Order shipped' },
-          { oldStatus: ORDER_STATUS_VALUE.SHIPPING, newStatus: ORDER_STATUS_VALUE.DELIVERED, note: 'Order delivered' },
-          { oldStatus: ORDER_STATUS_VALUE.DELIVERED, newStatus: ORDER_STATUS_VALUE.REVIEWED, note: 'Customer reviewed' },
+          {
+            oldStatus: 'pending' as OrderStatus,
+            newStatus: ORDER_STATUS_VALUE.PENDING,
+            note: 'Order created',
+          },
+          {
+            oldStatus: ORDER_STATUS_VALUE.PENDING,
+            newStatus: ORDER_STATUS_VALUE.CONFIRMED,
+            note: 'Order confirmed',
+          },
+          {
+            oldStatus: ORDER_STATUS_VALUE.CONFIRMED,
+            newStatus: ORDER_STATUS_VALUE.SHIPPING,
+            note: 'Order shipped',
+          },
+          {
+            oldStatus: ORDER_STATUS_VALUE.SHIPPING,
+            newStatus: ORDER_STATUS_VALUE.DELIVERED,
+            note: 'Order delivered',
+          },
+          {
+            oldStatus: ORDER_STATUS_VALUE.DELIVERED,
+            newStatus: ORDER_STATUS_VALUE.REVIEWED,
+            note: 'Customer reviewed',
+          },
         ],
       },
       {
         name: 'Cancelled Order',
         status: ORDER_STATUS_VALUE.CANCELLED,
         statusHistory: [
-          { oldStatus: 'pending' as OrderStatus, newStatus: ORDER_STATUS_VALUE.PENDING, note: 'Order created' },
-          { oldStatus: ORDER_STATUS_VALUE.PENDING, newStatus: ORDER_STATUS_VALUE.CANCELLED, note: 'Order cancelled by customer' },
+          {
+            oldStatus: 'pending' as OrderStatus,
+            newStatus: ORDER_STATUS_VALUE.PENDING,
+            note: 'Order created',
+          },
+          {
+            oldStatus: ORDER_STATUS_VALUE.PENDING,
+            newStatus: ORDER_STATUS_VALUE.CANCELLED,
+            note: 'Order cancelled by customer',
+          },
         ],
+      },
+      // Explicit failed payment (older than auto-cancel cutoff) - should be auto-cancelled by job
+      {
+        name: 'Failed Payment (Old)',
+        status: ORDER_STATUS_VALUE.PENDING,
+        statusHistory: [
+          {
+            oldStatus: 'pending' as OrderStatus,
+            newStatus: ORDER_STATUS_VALUE.PENDING,
+            note: 'Order created',
+          },
+        ],
+        paymentStatus: PAYMENT_STATUS_VALUE.FAILED,
+        // make it older than 30 minutes so cleanup job picks it up
+        orderDateOffsetMs: 1000 * 60 * 60 * 2, // 2 hours
+        isPaid: false,
+      },
+      // Explicit failed payment (recent) - should NOT be auto-cancelled yet
+      {
+        name: 'Failed Payment (Recent)',
+        status: ORDER_STATUS_VALUE.PENDING,
+        statusHistory: [
+          {
+            oldStatus: 'pending' as OrderStatus,
+            newStatus: ORDER_STATUS_VALUE.PENDING,
+            note: 'Order created',
+          },
+        ],
+        paymentStatus: PAYMENT_STATUS_VALUE.FAILED,
+        orderDateOffsetMs: 0,
+        isPaid: false,
       },
     ];
 
@@ -176,21 +291,49 @@ async function seedOrder(): Promise<void> {
       /**
        * CREATE ORDER
        */
+      const computedOrderDate = orderState.orderDateOffsetMs
+        ? new Date(Date.now() - (orderState.orderDateOffsetMs as number))
+        : new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+
+      const explicitIsPaid = typeof orderState.isPaid === 'boolean' ? orderState.isPaid : undefined;
+      const explicitPaymentStatus = orderState.paymentStatus as string | undefined;
+
+      const isPaidValue =
+        typeof explicitIsPaid === 'boolean'
+          ? explicitIsPaid
+          : explicitPaymentStatus === PAYMENT_STATUS_VALUE.SUCCESS
+            ? true
+            : orderState.status !== ORDER_STATUS_VALUE.CANCELLED
+              ? Math.random() > 0.3
+              : false;
+
+      const paymentStatusValue = explicitPaymentStatus
+        ? explicitPaymentStatus
+        : inferPaymentStatus(orderState.status);
+
+      const bankTransferTransactionCode =
+        paymentStatusValue === PAYMENT_STATUS_VALUE.SUCCESS ? `TX-${Date.now()}-${i}` : null;
+      const bankTransferTime =
+        paymentStatusValue === PAYMENT_STATUS_VALUE.SUCCESS ? new Date() : null;
+
       const order = await orderRepo.save(
         orderRepo.create({
           status: orderState.status,
-          orderDate: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
+          orderDate: computedOrderDate,
           totalProductAmount,
           shippingFee,
           discountAmount,
           totalAmount: finalTotal,
-          isPaid: orderState.status !== ORDER_STATUS_VALUE.CANCELLED ? Math.random() > 0.3 : false,
+          payment_status: paymentStatusValue,
+          isPaid: isPaidValue,
           paymentMethod: randomItem([
             PAYMENT_METHOD_VALUE.CASH_ON_DELIVERY,
             PAYMENT_METHOD_VALUE.VNPAY_WALLET,
             PAYMENT_METHOD_VALUE.MOMO_WALLET,
             PAYMENT_METHOD_VALUE.ZALOPAY_WALLET,
           ]),
+          bankTransferTime,
+          bankTransferTransactionCode,
           note: `Seed ${orderState.name} #${i + 1}`,
           accountId: account.id,
           shippingInfoId: 1,
@@ -229,7 +372,9 @@ async function seedOrder(): Promise<void> {
             oldStatus: h.oldStatus,
             newStatus: h.newStatus,
             note: h.note,
-            changedAt: new Date(Date.now() - (orderState.statusHistory.length - index) * 60 * 60 * 1000),
+            changedAt: new Date(
+              Date.now() - (orderState.statusHistory.length - index) * 60 * 60 * 1000
+            ),
           })
         )
       );

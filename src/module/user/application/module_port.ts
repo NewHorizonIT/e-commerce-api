@@ -1,5 +1,7 @@
 import {
   CreateShippingAddressDTO,
+  AdminUserListQueryDTO,
+  PaginatedAdminUsersDTO,
   PersonalInformationDTO,
   ShippingAddressDTO,
   UpsertPersonalInformationDTO,
@@ -28,6 +30,7 @@ export interface IUserModulePort {
   ): Promise<ShippingAddressDTO>;
   deleteShippingAddress(accountId: number, addressId: number): Promise<void>;
   // Admin endpoints
+  listUsers(query: AdminUserListQueryDTO): Promise<PaginatedAdminUsersDTO>;
   getAdminUserProfile(accountId: number): Promise<AdminUserProfileDTO>;
   adminCreatePersonalInformation(
     dto: AdminCreatePersonalInformationDTO

@@ -9,6 +9,14 @@ export const ORDER_STATUS_VALUE = {
 
 export type OrderStatus = (typeof ORDER_STATUS_VALUE)[keyof typeof ORDER_STATUS_VALUE];
 
+export const PAYMENT_STATUS_VALUE = {
+  PENDING: 'pending',
+  SUCCESS: 'success',
+  FAILED: 'failed',
+} as const;
+
+export type PaymentStatus = (typeof PAYMENT_STATUS_VALUE)[keyof typeof PAYMENT_STATUS_VALUE];
+
 export const PAYMENT_METHOD_VALUE = {
   CASH_ON_DELIVERY: 'cash_on_delivery',
   VNPAY_WALLET: 'vnpay_wallet',

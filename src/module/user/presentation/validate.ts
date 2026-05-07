@@ -49,6 +49,11 @@ export const accountIdParamSchema = z.object({
   accountId: commonIdSchema,
 });
 
+export const listUsersQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+});
+
 export const adminCreatePersonalInformationSchema = z.object({
   accountId: commonIdSchema,
   name: z.string().trim().min(1).max(255),

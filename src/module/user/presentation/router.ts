@@ -9,6 +9,7 @@ import {
   upsertPersonalInformationSchema,
   validateRequest,
   accountIdParamSchema,
+  listUsersQuerySchema,
   adminCreatePersonalInformationSchema,
   adminUpdatePersonalInformationSchema,
 } from './validate';
@@ -48,6 +49,14 @@ export function createUserRouter(controller: UserController): Router {
   );
 
   // Admin endpoints
+  userRouter.get(
+    '/admin/users',
+    authenticate,
+    authorizeRole('admin'),
+    validateRequest({ query: listUsersQuerySchema }),
+    controller.listUsers.bind(controller)
+  );
+
   userRouter.get(
     '/admin/users/:accountId',
     authenticate,

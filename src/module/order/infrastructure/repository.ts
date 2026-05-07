@@ -11,7 +11,12 @@ import {
   UpdateOrderStatusDTO,
   UpdateOrderPaymentDTO,
 } from '../application/dtos';
-import { ORDER_STATUS_VALUE, OrderStatus, PaymentMethod } from '../domain/value_objects';
+import {
+  ORDER_STATUS_VALUE,
+  OrderStatus,
+  PaymentMethod,
+  PAYMENT_STATUS_VALUE,
+} from '../domain/value_objects';
 import { VariantEntity } from '@/module/product/infarstructure/productEntity';
 import { VariantNotFoundError } from '@/module/product/application/usecase/errors';
 import { FailedOrderCreationError } from '../domain/errors';
@@ -144,6 +149,7 @@ export class TypeORMOrderRepository implements IOrderRepository {
         discountAmount: o.discountAmount,
         totalAmount: o.totalAmount,
         isPaid: o.isPaid,
+        paymentStatus: o.payment_status as any,
         paymentMethod: o.paymentMethod as PaymentMethod,
         bankTransferTime: o.bankTransferTime ? new Date(o.bankTransferTime).toISOString() : null,
         bankTransferTransactionCode: o.bankTransferTransactionCode,
@@ -193,6 +199,7 @@ export class TypeORMOrderRepository implements IOrderRepository {
       discountAmount: order.discountAmount,
       totalAmount: order.totalAmount,
       isPaid: order.isPaid,
+      paymentStatus: order.payment_status as any,
       paymentMethod: order.paymentMethod as PaymentMethod,
       bankTransferTime: order.bankTransferTime ? this.toIsoString(order.bankTransferTime) : null,
       bankTransferTransactionCode: order.bankTransferTransactionCode,
@@ -220,6 +227,54 @@ export class TypeORMOrderRepository implements IOrderRepository {
     };
   }
 
+  async findFailedPaymentOrdersBeforeTime(cutoffTime: Date): Promise<OrderDetailDTO[]> {
+    const orders = await this.orderRepo.find({
+      where: {
+        status: ORDER_STATUS_VALUE.PENDING,
+        payment_status: PAYMENT_STATUS_VALUE.FAILED,
+      },
+      relations: ['items', 'histories'],
+    });
+
+    return orders
+      .filter((order) => new Date(order.orderDate).getTime() < cutoffTime.getTime())
+      .map((order) => ({
+        id: order.id,
+        status: order.status as OrderStatus,
+        orderDate: new Date(order.orderDate).toISOString(),
+        totalProductAmount: order.totalProductAmount,
+        shippingFee: order.shippingFee,
+        discountAmount: order.discountAmount,
+        totalAmount: order.totalAmount,
+        isPaid: order.isPaid,
+        paymentStatus: order.payment_status as any,
+        paymentMethod: order.paymentMethod as PaymentMethod,
+        bankTransferTime: order.bankTransferTime ? this.toIsoString(order.bankTransferTime) : null,
+        bankTransferTransactionCode: order.bankTransferTransactionCode,
+        note: order.note,
+        accountId: order.accountId,
+        shippingInfoId: order.shippingInfoId,
+        discountCodeId: order.discountCodeId,
+        items: order.items.map((i) => ({
+          id: i.id,
+          productNameSnapshot: i.productNameSnapshot,
+          variantNameSnapshot: i.variantNameSnapshot,
+          priceBeforeDiscount: i.priceBeforeDiscount,
+          priceAfterDiscount: i.priceAfterDiscount,
+          quantity: i.quantity,
+          totalAmount: i.totalAmount,
+          variantId: i.variantId,
+        })),
+        histories: order.histories.map((h) => ({
+          id: h.id,
+          note: h.note,
+          changedAt: this.toIsoString(h.changedAt),
+          oldStatus: h.oldStatus,
+          newStatus: h.newStatus,
+        })),
+      }));
+  }
+
   async createOrder(dto: CreateOrderDTO): Promise<OrderDetailDTO> {
     const queryRunner = AppDataSource.createQueryRunner();
     await queryRunner.connect();
@@ -234,6 +289,7 @@ export class TypeORMOrderRepository implements IOrderRepository {
         discountAmount: dto.discountAmount ?? 0,
         totalAmount: 0,
         isPaid: false,
+        payment_status: PAYMENT_STATUS_VALUE.PENDING,
         paymentMethod: dto.paymentMethod,
         note: dto.note?.trim() || null,
         accountId: dto.accountId,
@@ -383,6 +439,7 @@ export class TypeORMOrderRepository implements IOrderRepository {
       }
 
       order.isPaid = dto.isPaid;
+      order.payment_status = dto.paymentStatus;
       order.paymentMethod = dto.paymentMethod;
       order.bankTransferTime = dto.bankTransferTime ? new Date(dto.bankTransferTime) : null;
       order.bankTransferTransactionCode = dto.bankTransferTransactionCode ?? null;

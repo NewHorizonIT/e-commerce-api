@@ -7,6 +7,7 @@ import Account from '../domain/domain';
 import { IAccountRepository } from '../domain/interface';
 import { PhoneNumber } from '../domain/value_objects';
 import { AccountEntity, AccountMapper } from './accountEntity';
+import { AccountListQueryDTO, PaginatedAdminAccountsDTO } from '../application/dtos';
 
 /*
   Example:
@@ -37,6 +38,36 @@ export class TypeORMAccountRepository implements IAccountRepository {
   async findByPhoneNum(phoneNum: PhoneNumber): Promise<Account | null> {
     const entity = await this.repo.findOne({ where: { phoneNum: phoneNum.value } });
     return entity ? AccountMapper.toDomain(entity) : null;
+  }
+
+  async listAccounts(query: AccountListQueryDTO): Promise<PaginatedAdminAccountsDTO> {
+    const page = query.page;
+    const limit = query.limit;
+    const [entities, totalItems] = await this.repo.findAndCount({
+      order: { createdDate: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    const items = entities.map((entity) => {
+      const account = AccountMapper.toDomain(entity);
+
+      return {
+        id: account.getId() as number,
+        phoneNum: account.getPhoneNum().value,
+        role: account.getRole(),
+        isLocked: account.getIsLocked(),
+        createdDate: account.getCreatedDate(),
+      };
+    });
+
+    return {
+      items,
+      page,
+      limit,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+    };
   }
 
   async updatePassword(id: number, newPassword: string): Promise<void> {

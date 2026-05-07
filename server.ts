@@ -3,6 +3,7 @@ import { config, databaseConnection, redisClient } from './src/config/index.js';
 import { appLogger } from './src/shared/logging/appLogger.js';
 import { ErrorLogger } from './src/shared/logging/errorLogger.js';
 import { initContainer } from './src/shared/container/index.js';
+import { startOrderPaymentCleanupJob } from './src/shared/jobs/order-payment-cleanup.js';
 
 async function bootstrap(): Promise<void> {
   try {
@@ -11,6 +12,7 @@ async function bootstrap(): Promise<void> {
     const { default: app } = await import('./src/app');
     await databaseConnection.connect();
     await redisClient.connect();
+    startOrderPaymentCleanupJob();
 
     const server = app.listen(config.app.port, () => {
       appLogger.info('E-Commerce API server started', {

@@ -1,4 +1,5 @@
 import { inject, injectable } from 'tsyringe';
+import { authPublicApi } from '../auth/module';
 import { IUserModulePort } from './application/module_port';
 import { USER_TOKENS } from './tokens';
 import GetCurrentProfileUseCase from './application/usecase/getCurrentProfile';
@@ -11,6 +12,9 @@ import AdminCreatePersonalInformationUseCase from './application/usecase/adminCr
 import AdminUpdatePersonalInformationUseCase from './application/usecase/adminUpdatePersonalInformation';
 import {
   CreateShippingAddressDTO,
+  AdminUserListQueryDTO,
+  AdminUserSummaryDTO,
+  PaginatedAdminUsersDTO,
   PersonalInformationDTO,
   ShippingAddressDTO,
   UpdateShippingAddressDTO,
@@ -74,6 +78,26 @@ export class UserModuleAdapter implements IUserModulePort {
 
   deleteShippingAddress(accountId: number, addressId: number): Promise<void> {
     return this.deleteShippingAddressUseCase.execute(accountId, addressId);
+  }
+
+  async listUsers(query: AdminUserListQueryDTO): Promise<PaginatedAdminUsersDTO> {
+    const result = await authPublicApi.listAccounts(query);
+
+    return {
+      items: result.items.map(
+        (item): AdminUserSummaryDTO => ({
+          id: item.id,
+          phoneNum: item.phoneNum,
+          role: item.role,
+          isLocked: item.isLocked,
+          createdDate: item.createdDate,
+        })
+      ),
+      page: result.page,
+      limit: result.limit,
+      totalItems: result.totalItems,
+      totalPages: result.totalPages,
+    };
   }
 
   async getAdminUserProfile(accountId: number): Promise<AdminUserProfileDTO> {

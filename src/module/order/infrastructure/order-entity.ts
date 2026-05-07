@@ -1,5 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
-import { ORDER_STATUS_VALUE, PAYMENT_METHOD_VALUE } from '../domain/value_objects';
+import {
+  ORDER_STATUS_VALUE,
+  PAYMENT_METHOD_VALUE,
+  PAYMENT_STATUS_VALUE,
+} from '../domain/value_objects';
 
 @Entity('orders')
 export class OrderEntity {
@@ -33,6 +37,14 @@ export class OrderEntity {
 
   @Column({ type: 'decimal', precision: 12, scale: 3, name: 'total_amount' })
   totalAmount!: number;
+
+  @Column({
+    type: 'enum',
+    enum: [PAYMENT_STATUS_VALUE.SUCCESS, PAYMENT_STATUS_VALUE.FAILED, PAYMENT_STATUS_VALUE.PENDING],
+    name: 'payment_status',
+    default: PAYMENT_STATUS_VALUE.PENDING,
+  })
+  payment_status!: string;
 
   @Column({ type: 'boolean', name: 'is_paid' })
   isPaid!: boolean;
