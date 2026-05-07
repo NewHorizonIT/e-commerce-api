@@ -36,7 +36,20 @@ export class CreateReviewUseCase {
        new ReviewContent(dto.content);
      }
  
-     // 4. create
-     return this.reviewRepository.createReview(dto);
+     // 4. create review
+     const created = await this.reviewRepository.createReview(dto);
+
+     // 5. save media URLs if provided
+     if (dto.mediaUrls && dto.mediaUrls.length > 0) {
+       await this.reviewRepository.saveReviewMedia(created.id, dto.mediaUrls);
+       
+       // Reload review with media
+       const reloaded = await this.reviewRepository.findById(created.id);
+       if (reloaded) {
+         return reloaded;
+       }
+     }
+
+     return created;
    }
 }

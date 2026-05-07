@@ -1,6 +1,6 @@
 import { injectable } from 'tsyringe';
 import { AppDataSource } from '@/config';
-import { MediaFileEntity } from '@/module/product/infarstructure/productEntity';
+import { ReviewEntity, ReviewMediaEntity } from './reviewEntity';
 import {
   CreateReviewDTO,
   UpdateReviewDTO,
@@ -11,7 +11,6 @@ import {
   RatingSummaryDTO,
 } from '../application/dtos';
 import { IReviewRepository } from '../domain/interface';
-import { ReviewEntity } from './reviewEntity';
 
 type ReviewBaseRow = {
   review_id: string;
@@ -54,7 +53,7 @@ function normalizeQuery(query: ReviewListQueryDTO): ReviewListQueryDTO {
 @injectable()
 export class TypeORMReviewRepository implements IReviewRepository {
   private readonly reviewRepo = AppDataSource.getRepository(ReviewEntity);
-  private readonly mediaFileRepo = AppDataSource.getRepository(MediaFileEntity);
+  private readonly reviewMediaRepo = AppDataSource.getRepository(ReviewMediaEntity);
 
   constructor() {}
 
@@ -349,26 +348,51 @@ export class TypeORMReviewRepository implements IReviewRepository {
   }
 
   private async loadReviewMediaRows(reviewIds: number[]): Promise<ReviewMediaRow[]> {
-    try {
-      const rows = await this.mediaFileRepo.find({
-        where: {
-          entityType: 'review',
-        },
-        order: {
-          id: 'ASC',
-        },
-      });
+    if (reviewIds.length === 0) return [];
 
-      return rows
-        .filter((row) => reviewIds.includes(row.entityId))
-        .map((row) => ({
-          id: String(row.id),
-          review_id: String(row.entityId),
-          url: row.url,
-          file_type: row.fileType,
-        }));
-    } catch {
+    try {
+      const rows = await this.reviewMediaRepo
+        .createQueryBuilder('media')
+        .where('media.reviewId IN (:...reviewIds)', { reviewIds })
+        .orderBy('media.sortOrder', 'ASC')
+        .addOrderBy('media.id', 'ASC')
+        .getMany();
+
+      return rows.map((row) => ({
+        id: String(row.id),
+        review_id: String(row.reviewId),
+        url: row.url,
+        file_type: row.fileType,
+      }));
+    } catch (error) {
+      console.error('Error loading review media:', error);
       return [];
+    }
+  }
+
+  // 🔹 Save review media (images from Cloudinary URLs)
+  async saveReviewMedia(reviewId: number, mediaUrls: string[]): Promise<void> {
+    if (!mediaUrls || mediaUrls.length === 0) {
+      return;
+    }
+
+    // Clear existing media for this review
+    await this.reviewMediaRepo.delete({
+      reviewId,
+    });
+
+    // Save new media
+    const mediaEntities = mediaUrls.map((url, index) =>
+      this.reviewMediaRepo.create({
+        reviewId,
+        url,
+        fileType: 'image' as const,
+        sortOrder: index,
+      })
+    );
+
+    if (mediaEntities.length > 0) {
+      await this.reviewMediaRepo.save(mediaEntities);
     }
   }
 }

@@ -45,6 +45,17 @@ async updateReview(
       throw new ReviewNotFoundError(reviewId);
     }
 
+    // 🔹 Save media URLs if provided
+    if (dto.mediaUrls && dto.mediaUrls.length > 0) {
+      await this.reviewRepository.saveReviewMedia(reviewId, dto.mediaUrls);
+      
+      // Reload review with updated media
+      const reloaded = await this.reviewRepository.findById(reviewId);
+      if (reloaded) {
+        return reloaded;
+      }
+    }
+
     return updated;
   }
 

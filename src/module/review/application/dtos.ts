@@ -8,11 +8,13 @@ export interface CreateReviewDTO {
   accountId: number;
   rating: number; // 1-5
   content: string | null;
+  mediaUrls?: string[]; // Cloudinary URLs
 }
 
 export interface UpdateReviewDTO {
   rating?: number;
   content?: string;
+  mediaUrls?: string[]; // Cloudinary URLs
 }
 
 export interface ReviewMediaDTO {

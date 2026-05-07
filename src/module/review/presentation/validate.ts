@@ -29,7 +29,8 @@ export const createReviewSchema = z.object({
   accountId: z.number().int().positive(),
 
   rating: z.number().int().min(1).max(5),
-  content: z.string().trim().min(1).max(1000).optional(),
+  content: z.string().trim().min(1).max(1000).optional().nullable(),
+  mediaUrls: z.array(z.string().url()).optional(),
 });
 
 // 🔹 Update review
@@ -37,9 +38,10 @@ export const updateReviewSchema = z
   .object({
     rating: z.number().int().min(1).max(5).optional(),
     content: z.string().trim().min(1).max(1000).optional(),
+    mediaUrls: z.array(z.string().url()).optional(),
   })
   .refine(
-    (value) => value.rating !== undefined || value.content !== undefined,
+    (value) => value.rating !== undefined || value.content !== undefined || value.mediaUrls !== undefined,
     {
       message: 'At least one field must be provided for update',
     }

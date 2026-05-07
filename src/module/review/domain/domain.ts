@@ -8,7 +8,8 @@ export class Review {
     private orderId: number,
     private rating: RatingValue,
     private content: ReviewContent,
-    private createdAt: Date
+    private createdAt: Date,
+    private mediaUrls: string[] = []
   ) {}
 
   // 🔹 create new review
@@ -18,6 +19,7 @@ export class Review {
     orderId: number;
     rating: RatingValue;
     content: ReviewContent;
+    mediaUrls?: string[];
   }): Review {
     return new Review(
       null,
@@ -26,7 +28,8 @@ export class Review {
       params.orderId,
       params.rating,
       params.content,
-      new Date()
+      new Date(),
+      params.mediaUrls || []
     );
   }
 
@@ -39,6 +42,7 @@ export class Review {
     rating: RatingValue;
     content: ReviewContent;
     createdAt: Date;
+    mediaUrls?: string[];
   }): Review {
     return new Review(
       params.id,
@@ -47,7 +51,8 @@ export class Review {
       params.orderId,
       params.rating,
       params.content,
-      params.createdAt
+      params.createdAt,
+      params.mediaUrls || []
     );
   }
 
@@ -78,5 +83,9 @@ export class Review {
 
   getCreatedAt(): Date {
     return this.createdAt;
+  }
+
+  getMediaUrls(): string[] {
+    return this.mediaUrls;
   }
 }

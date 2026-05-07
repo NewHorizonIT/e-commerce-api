@@ -1,9 +1,4 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  Unique,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, Unique, OneToMany } from 'typeorm';
 
 @Entity('reviews')
 @Unique(['accountId', 'productId', 'orderId'])
@@ -31,6 +26,45 @@ export class ReviewEntity {
 
   @Column({ type: 'int', nullable: true, name: 'shipping_rating' })
   shippingRating!: number | null;
+
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    name: 'created_at',
+  })
+  createdAt!: Date;
+
+  // 🔹 Relationship to review media
+  @OneToMany(() => ReviewMediaEntity, (media) => media.reviewId, { eager: false })
+  media?: ReviewMediaEntity[];
+}
+
+// 🔹 ReviewMediaEntity - lưu ảnh/video cho review
+@Entity('review_media')
+export class ReviewMediaEntity {
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column({ type: 'int', name: 'review_id' })
+  reviewId!: number;
+
+  @Column({ type: 'varchar', length: 500 })
+  url!: string;
+
+  @Column({
+    type: 'enum',
+    enum: ['image', 'video'],
+    name: 'file_type',
+    default: 'image',
+  })
+  fileType!: 'image' | 'video';
+
+  @Column({
+    type: 'int',
+    name: 'sort_order',
+    default: 0,
+  })
+  sortOrder!: number;
 
   @Column({
     type: 'timestamp',
