@@ -676,13 +676,14 @@ paths:
     get:
       tags: [Review]
       summary: List reviews for a product
+      description: Get paginated list of reviews with media (images/videos) for a specific product
       parameters:
         - $ref: '#/components/parameters/ProductId'
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Limit'
       responses:
         '200':
-          description: Review list for product
+          description: Review list for product with media attached
           content:
             application/json:
               schema:
@@ -696,7 +697,8 @@ paths:
   /reviews:
     get:
       tags: [Review]
-      summary: List reviews
+      summary: List all reviews
+      description: Get paginated list of all product reviews with optional product filtering
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Limit'
@@ -705,9 +707,10 @@ paths:
           schema:
             type: integer
             minimum: 1
+          description: Filter reviews by product ID (optional)
       responses:
         '200':
-          description: Review list
+          description: Paginated review list with media
           content:
             application/json:
               schema:
@@ -719,7 +722,8 @@ paths:
                         $ref: '#/components/schemas/PaginatedReviews'
     post:
       tags: [Review]
-      summary: Create review
+      summary: Create review with optional images
+      description: Create a new review for a purchased product. Can attach multiple Cloudinary images/videos. Order must be in delivered status.
       security:
         - bearerAuth: []
       requestBody:
@@ -728,9 +732,29 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateReviewRequest'
+            examples:
+              with_images:
+                summary: Review with images
+                value:
+                  productId: 123
+                  orderId: 456
+                  accountId: 789
+                  rating: 5
+                  content: 'Great product! Exactly what I needed.'
+                  mediaUrls:
+                    - 'https://res.cloudinary.com/demo/image/upload/v1234567890/review-1.jpg'
+                    - 'https://res.cloudinary.com/demo/image/upload/v1234567890/review-2.jpg'
+              simple:
+                summary: Review without images
+                value:
+                  productId: 123
+                  orderId: 456
+                  accountId: 789
+                  rating: 4
+                  content: 'Good quality'
       responses:
         '201':
-          description: Review created
+          description: Review created successfully with media attached
           content:
             application/json:
               schema:
@@ -741,7 +765,7 @@ paths:
                       data:
                         $ref: '#/components/schemas/ReviewDetail'
         '400':
-          description: Invalid request body
+          description: Invalid request (validation error, order not delivered, duplicate review)
           content:
             application/json:
               schema:
@@ -756,7 +780,8 @@ paths:
   /reviews/{reviewId}:
     patch:
       tags: [Review]
-      summary: Update review
+      summary: Update review with optional new images
+      description: Update review rating, content, or media. Can only update reviews within 7 days of creation. Providing mediaUrls replaces all existing media.
       security:
         - bearerAuth: []
       parameters:
@@ -766,15 +791,33 @@ paths:
           schema:
             type: integer
             minimum: 1
+          description: Review ID to update
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateReviewRequest'
+            examples:
+              update_rating:
+                summary: Update rating only
+                value:
+                  rating: 4
+              update_media:
+                summary: Update media images
+                value:
+                  mediaUrls:
+                    - 'https://res.cloudinary.com/demo/image/upload/v1234567890/new-photo.jpg'
+              update_all:
+                summary: Update rating, content, and media
+                value:
+                  rating: 5
+                  content: 'Updated review - this is even better!'
+                  mediaUrls:
+                    - 'https://res.cloudinary.com/demo/image/upload/v1234567890/updated-1.jpg'
       responses:
         '200':
-          description: Review updated
+          description: Review updated successfully with new media
           content:
             application/json:
               schema:
@@ -785,7 +828,7 @@ paths:
                       data:
                         $ref: '#/components/schemas/ReviewDetail'
         '400':
-          description: Invalid request body
+          description: Invalid request (validation error or review too old to update)
           content:
             application/json:
               schema:
@@ -796,16 +839,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Review not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /products/{productId}/reviews/summary:
     get:
       tags: [Review]
-      summary: Get rating summary by product
+      summary: Get rating summary and distribution for a product
+      description: Get average rating, total review count, and rating distribution breakdown (5, 4, 3, 2, 1 star counts)
       parameters:
         - $ref: '#/components/parameters/ProductId'
       responses:
         '200':
-          description: Rating summary
+          description: Rating summary with distribution breakdown
           content:
             application/json:
               schema:
@@ -815,6 +865,12 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/RatingSummary'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /categories:
     get:
@@ -2844,66 +2900,94 @@ components:
 
     ReviewMedia:
       type: object
+      description: Media (image/video) attached to a review
       properties:
         id:
           type: integer
+          description: Media ID
         url:
           type: string
+          format: uri
+          description: Cloudinary URL to the media file
         fileType:
           type: string
           enum: [image, video]
+          description: Type of media file
 
     ReviewSelectedAttribute:
       type: object
+      description: Variant/attribute that was selected when creating the order and is included in the review
       properties:
         variantId:
           type: integer
+          description: Variant ID
         variantName:
           type: string
+          description: Variant name/snapshot from order
         groupId:
           type: integer
+          description: Variant group ID
         groupName:
           type: string
+          description: Variant group name (e.g., Size, Color)
         valueId:
           type: integer
+          description: Variant value ID
         value:
           type: string
+          description: Variant value (e.g., Large, Red)
         imageUrl:
           type: string
           nullable: true
+          format: uri
+          description: Optional image URL for the variant value
 
     ReviewDetail:
       type: object
+      description: Complete review with product details, user info, selected attributes, and attached media (images/videos)
       properties:
         id:
           type: integer
+          description: Review ID
         productId:
           type: integer
+          description: Product being reviewed
         idUser:
           type: integer
+          description: Account ID of the reviewer
         accountId:
           type: integer
+          description: Account ID of the reviewer
         username:
           type: string
+          description: Reviewer's username
         avatarUrl:
           type: string
           nullable: true
+          format: uri
+          description: Reviewer's avatar image URL
         orderId:
           type: integer
+          description: Order ID that contains the reviewed product
         rating:
           type: integer
+          description: Product rating (1-5 stars)
         content:
           type: string
           nullable: true
+          description: Review text content
         createdAt:
           type: string
           format: date-time
+          description: Review creation timestamp
         selectedAttributes:
           type: array
+          description: Product variant/attributes that were reviewed
           items:
             $ref: '#/components/schemas/ReviewSelectedAttribute'
         media:
           type: array
+          description: Attached images and videos (from Cloudinary)
           items:
             $ref: '#/components/schemas/ReviewMedia'
 
@@ -3106,31 +3190,53 @@ components:
         productId:
           type: integer
           minimum: 1
+          description: Product ID to review
         orderId:
           type: integer
           minimum: 1
+          description: Order ID that contains the product
         accountId:
           type: integer
           minimum: 1
+          description: Account ID of the reviewer
         rating:
           type: integer
           minimum: 1
           maximum: 5
+          description: Product rating (1-5 stars)
         content:
           type: string
           maxLength: 1000
           nullable: true
+          description: Review text content
+        mediaUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+          nullable: true
+          description: Array of Cloudinary image URLs to attach to the review
 
     UpdateReviewRequest:
       type: object
+      description: At least one field (rating, content, or mediaUrls) must be provided
       properties:
         rating:
           type: integer
           minimum: 1
           maximum: 5
+          description: Updated product rating
         content:
           type: string
           maxLength: 1000
+          description: Updated review text content
+        mediaUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+          nullable: true
+          description: Array of Cloudinary image URLs - replaces existing media if provided
 
     ProductDetail:
       type: object

@@ -31,6 +31,9 @@ export interface IReviewRepository {
   // ===== DELETE =====
   deleteReview(id: number): Promise<boolean>;
 
+  // ===== MEDIA =====
+  saveReviewMedia(reviewId: number, mediaUrls: string[]): Promise<void>;
+
   // ===== HELPER =====
   checkProductExists(productId: number): Promise<boolean>;
   isOrderOwner(accountId: number, orderId: number): Promise<boolean>;

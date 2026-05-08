@@ -15,7 +15,7 @@ import {
   VariantGroupEntity,
   VariantValueEntity,
 } from '@/module/product/infarstructure/productEntity.js';
-import { ReviewEntity } from '@/module/review/infrastructure/reviewEntity.js';
+import { ReviewEntity, ReviewMediaEntity } from '@/module/review/infrastructure/reviewEntity.js';
 import {
   OrderEntity,
   OrderItemEntity,
@@ -54,6 +54,7 @@ const dataSourceOptions: DataSourceOptions = {
     OrderItemEntity,
     OrderStatusHistoryEntity,
     ReviewEntity,
+    ReviewMediaEntity,
     CartItemDetailEntity,
     CartEntity,
     PersonalInformationEntity,
