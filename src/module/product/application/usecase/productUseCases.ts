@@ -16,6 +16,8 @@ import {
   UpdateVariantDTO,
   UpdateVariantStockDTO,
   UpdateVisibilityDTO,
+  VariantGroupDetailDTO,
+  VariantValueSimpleDTO,
 } from '../dtos';
 import {
   CategoryNotFoundError,
@@ -154,12 +156,17 @@ export default class ProductUseCases {
     }
   }
 
-  async createVariantGroup(productId: number, dto: CreateVariantGroupDTO): Promise<void> {
+  async createVariantGroup(
+    productId: number,
+    dto: CreateVariantGroupDTO
+  ): Promise<VariantGroupDetailDTO> {
     const created = await this.productRepository.createVariantGroup(productId, dto);
+    return created;
+  }
 
-    if (!created) {
-      throw new ProductNotFoundError(productId);
-    }
+  async getProductVariantGroups(productId: number): Promise<VariantGroupDetailDTO[]> {
+    const groups = await this.productRepository.getProductVariantGroups(productId);
+    return groups;
   }
 
   async updateVariantGroup(
@@ -178,12 +185,14 @@ export default class ProductUseCases {
     productId: number,
     groupId: number,
     dto: CreateVariantValueDTO
-  ): Promise<void> {
+  ): Promise<VariantValueSimpleDTO> {
     const created = await this.productRepository.createVariantValue(productId, groupId, dto);
 
     if (!created) {
       throw new VariantGroupNotFoundError(groupId);
     }
+
+    return created;
   }
 
   async updateVariantValue(

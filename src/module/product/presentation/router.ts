@@ -116,6 +116,13 @@ export function createProductRouter(controller: ProductController): Router {
     controller.updateVariantStock.bind(controller)
   );
 
+  router.get(
+    '/admin/products/:productId/variant-groups',
+    authenticate,
+    authorizeRole('admin'),
+    validateRequest({ params: idParamSchema }),
+    controller.getVariantGroups.bind(controller)
+  );
   router.post(
     '/admin/products/:productId/variant-groups',
     authenticate,
@@ -152,7 +159,12 @@ export function createProductRouter(controller: ProductController): Router {
     controller.deleteVariantValue.bind(controller)
   );
 
-  router.get('/admin/categories', authenticate, authorizeRole('admin'), controller.listCategories.bind(controller));
+  router.get(
+    '/admin/categories',
+    authenticate,
+    authorizeRole('admin'),
+    controller.listCategories.bind(controller)
+  );
   router.post(
     '/admin/categories',
     authenticate,
@@ -175,7 +187,12 @@ export function createProductRouter(controller: ProductController): Router {
     controller.deleteCategory.bind(controller)
   );
 
-  router.get('/admin/product-types', authenticate, authorizeRole('admin'), controller.listProductTypes.bind(controller));
+  router.get(
+    '/admin/product-types',
+    authenticate,
+    authorizeRole('admin'),
+    controller.listProductTypes.bind(controller)
+  );
   router.post(
     '/admin/product-types',
     authenticate,

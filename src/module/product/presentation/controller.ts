@@ -85,8 +85,14 @@ export class ProductController {
 
   async createVariantGroup(req: Request, res: Response): Promise<void> {
     const { productId } = req.params as { productId: string };
-    await this.productModulePort.createVariantGroup(Number(productId), req.body);
-    res.status(201).json({ isSuccess: true });
+    const group = await this.productModulePort.createVariantGroup(Number(productId), req.body);
+    new SuccessResponse(group, 'Variant group created successfully', StatusCode.CREATED).send(res);
+  }
+
+  async getVariantGroups(req: Request, res: Response): Promise<void> {
+    const { productId } = req.params as { productId: string };
+    const groups = await this.productModulePort.getProductVariantGroups(Number(productId));
+    new SuccessResponse(groups, undefined, StatusCode.OK).send(res);
   }
 
   async updateVariantGroup(req: Request, res: Response): Promise<void> {
@@ -97,8 +103,12 @@ export class ProductController {
 
   async createVariantValue(req: Request, res: Response): Promise<void> {
     const { productId, groupId } = req.params as { productId: string; groupId: string };
-    await this.productModulePort.createVariantValue(Number(productId), Number(groupId), req.body);
-    res.status(201).json({ isSuccess: true });
+    const value = await this.productModulePort.createVariantValue(
+      Number(productId),
+      Number(groupId),
+      req.body
+    );
+    new SuccessResponse(value, 'Variant value created successfully', StatusCode.CREATED).send(res);
   }
 
   async updateVariantValue(req: Request, res: Response): Promise<void> {

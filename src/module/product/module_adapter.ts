@@ -16,6 +16,8 @@ import {
   UpdateVariantDTO,
   UpdateVariantStockDTO,
   UpdateVisibilityDTO,
+  VariantGroupDetailDTO,
+  VariantValueSimpleDTO,
 } from './application/dtos';
 import { IProductModulePort } from './application/module_port';
 import ProductUseCases from './application/usecase/productUseCases';
@@ -75,8 +77,15 @@ export class ProductModuleAdapter implements IProductModulePort {
     return this.productUseCases.updateVariantStock(variantId, dto);
   }
 
-  createVariantGroup(productId: number, dto: CreateVariantGroupDTO): Promise<void> {
+  createVariantGroup(
+    productId: number,
+    dto: CreateVariantGroupDTO
+  ): Promise<VariantGroupDetailDTO> {
     return this.productUseCases.createVariantGroup(productId, dto);
+  }
+
+  getProductVariantGroups(productId: number): Promise<VariantGroupDetailDTO[]> {
+    return this.productUseCases.getProductVariantGroups(productId);
   }
 
   updateVariantGroup(
@@ -91,7 +100,7 @@ export class ProductModuleAdapter implements IProductModulePort {
     productId: number,
     groupId: number,
     dto: CreateVariantValueDTO
-  ): Promise<void> {
+  ): Promise<VariantValueSimpleDTO> {
     return this.productUseCases.createVariantValue(productId, groupId, dto);
   }
 

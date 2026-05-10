@@ -16,6 +16,8 @@ import {
   UpdateVariantDTO,
   UpdateVariantStockDTO,
   UpdateVisibilityDTO,
+  VariantGroupDetailDTO,
+  VariantValueSimpleDTO,
 } from '../application/dtos';
 
 export interface IProductRepository {
@@ -36,7 +38,8 @@ export interface IProductRepository {
   ): Promise<ProductDetailDTO | null>;
   deleteVariant(productId: number, variantId: number): Promise<boolean>;
   updateVariantStock(variantId: number, dto: UpdateVariantStockDTO): Promise<boolean>;
-  createVariantGroup(productId: number, dto: CreateVariantGroupDTO): Promise<boolean>;
+  createVariantGroup(productId: number, dto: CreateVariantGroupDTO): Promise<VariantGroupDetailDTO>;
+  getProductVariantGroups(productId: number): Promise<VariantGroupDetailDTO[]>;
   updateVariantGroup(
     productId: number,
     groupId: number,
@@ -46,7 +49,7 @@ export interface IProductRepository {
     productId: number,
     groupId: number,
     dto: CreateVariantValueDTO
-  ): Promise<boolean>;
+  ): Promise<VariantValueSimpleDTO | null>;
   updateVariantValue(
     productId: number,
     groupId: number,

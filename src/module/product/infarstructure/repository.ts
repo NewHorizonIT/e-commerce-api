@@ -20,6 +20,8 @@ import {
   UpdateVariantDTO,
   UpdateVariantStockDTO,
   UpdateVisibilityDTO,
+  VariantValueSimpleDTO,
+  VariantGroupDetailDTO,
 } from '../application/dtos';
 import { IProductRepository } from '../domain/interface';
 import {
@@ -500,14 +502,17 @@ export class TypeORMProductRepository implements IProductRepository {
     return true;
   }
 
-  async createVariantGroup(productId: number, dto: CreateVariantGroupDTO): Promise<boolean> {
+  async createVariantGroup(
+    productId: number,
+    dto: CreateVariantGroupDTO
+  ): Promise<VariantGroupDetailDTO> {
     const product = await this.productRepo.findOne({ where: { id: productId } });
 
     if (!product) {
-      return false;
+      throw new Error('Product not found');
     }
 
-    await this.variantGroupRepo.save(
+    const created = await this.variantGroupRepo.save(
       this.variantGroupRepo.create({
         productId,
         name: dto.name.trim(),
@@ -515,7 +520,33 @@ export class TypeORMProductRepository implements IProductRepository {
       })
     );
 
-    return true;
+    return {
+      id: created.id,
+      name: created.name,
+      displayOrder: created.displayOrder,
+      values: [],
+    };
+  }
+
+  async getProductVariantGroups(productId: number): Promise<VariantGroupDetailDTO[]> {
+    const variantGroups = await this.variantGroupRepo.find({
+      where: { productId },
+      relations: ['values'],
+      order: { displayOrder: 'ASC' },
+    });
+
+    return variantGroups.map((group) => ({
+      id: group.id,
+      name: group.name,
+      displayOrder: group.displayOrder,
+      values: group.values
+        .sort((a, b) => a.id - b.id)
+        .map((value) => ({
+          id: value.id,
+          value: value.value,
+          imageUrl: value.imageUrl,
+        })),
+    }));
   }
 
   async updateVariantGroup(
@@ -545,14 +576,14 @@ export class TypeORMProductRepository implements IProductRepository {
     productId: number,
     groupId: number,
     dto: CreateVariantValueDTO
-  ): Promise<boolean> {
+  ): Promise<VariantValueSimpleDTO | null> {
     const group = await this.variantGroupRepo.findOne({ where: { id: groupId, productId } });
 
     if (!group) {
-      return false;
+      return null;
     }
 
-    await this.variantValueRepo.save(
+    const created = await this.variantValueRepo.save(
       this.variantValueRepo.create({
         variantGroupId: groupId,
         value: dto.value.trim(),
@@ -560,7 +591,11 @@ export class TypeORMProductRepository implements IProductRepository {
       })
     );
 
-    return true;
+    return {
+      id: created.id,
+      value: created.value,
+      imageUrl: created.imageUrl,
+    };
   }
 
   async updateVariantValue(

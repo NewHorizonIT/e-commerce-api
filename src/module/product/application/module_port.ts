@@ -16,6 +16,8 @@ import {
   UpdateVariantDTO,
   UpdateVariantStockDTO,
   UpdateVisibilityDTO,
+  VariantGroupDetailDTO,
+  VariantValueSimpleDTO,
 } from './dtos';
 
 export interface IProductModulePort {
@@ -38,9 +40,14 @@ export interface IProductModulePort {
   deleteVariant(productId: number, variantId: number): Promise<void>;
   updateVariantStock(variantId: number, dto: UpdateVariantStockDTO): Promise<void>;
 
-  createVariantGroup(productId: number, dto: CreateVariantGroupDTO): Promise<void>;
+  createVariantGroup(productId: number, dto: CreateVariantGroupDTO): Promise<VariantGroupDetailDTO>;
+  getProductVariantGroups(productId: number): Promise<VariantGroupDetailDTO[]>;
   updateVariantGroup(productId: number, groupId: number, dto: UpdateVariantGroupDTO): Promise<void>;
-  createVariantValue(productId: number, groupId: number, dto: CreateVariantValueDTO): Promise<void>;
+  createVariantValue(
+    productId: number,
+    groupId: number,
+    dto: CreateVariantValueDTO
+  ): Promise<VariantValueSimpleDTO>;
   updateVariantValue(
     productId: number,
     groupId: number,
