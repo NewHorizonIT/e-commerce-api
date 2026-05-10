@@ -7,12 +7,11 @@ import { CreateReviewUseCase } from './application/usecase/createReview';
 import { UpdateReviewUseCase } from './application/usecase/updateReview';
 import { ListReviewsUseCase } from './application/usecase/listReviews';
 import { GetRatingSummaryUseCase } from './application/usecase/getRatingSummary';
+import { registerOrderDependencies } from '@/module/order/container';
 
 export function registerReviewDependencies(container: DependencyContainer): void {
-  container.registerSingleton(
-    REVIEW_TOKENS.IReviewRepository,
-    TypeORMReviewRepository
-  );
+  registerOrderDependencies(container);
+  container.registerSingleton(REVIEW_TOKENS.IReviewRepository, TypeORMReviewRepository);
   container.registerSingleton(REVIEW_TOKENS.createReview, CreateReviewUseCase);
   container.registerSingleton(REVIEW_TOKENS.updateReview, UpdateReviewUseCase);
   container.registerSingleton(REVIEW_TOKENS.listReviews, ListReviewsUseCase);
