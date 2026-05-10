@@ -39,12 +39,8 @@ export class TypeORMOrderRepository implements IOrderRepository {
     return Number.isNaN(date.getTime()) ? new Date(0).toISOString() : date.toISOString();
   }
 
-  constructor(
-    private readonly orderRepo: Repository<OrderEntity> = AppDataSource.getRepository(OrderEntity),
-    private readonly variantRepo: Repository<VariantEntity> = AppDataSource.getRepository(
-      VariantEntity
-    )
-  ) {}
+  private readonly orderRepo = AppDataSource.getRepository(OrderEntity);
+  private readonly variantRepo = AppDataSource.getRepository(VariantEntity);
 
   // async listOrders(query: OrderListQueryDTO): Promise<PaginatedOrdersDTO> {
   //   const page = query.page > 0 ? query.page : 1;
