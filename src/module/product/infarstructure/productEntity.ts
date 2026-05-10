@@ -65,7 +65,7 @@ export class ProductEntity {
   @Column({ type: 'varchar', length: 255 })
   name!: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: 'text', nullable: true })
   description!: string | null;
 
   @Column({ type: 'int', default: 0, name: 'total_sold' })

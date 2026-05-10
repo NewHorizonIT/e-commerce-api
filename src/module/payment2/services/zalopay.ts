@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { TypeORMOrderRepository } from '@/module/order/infrastructure/repository';
 import { BadRequestError } from '@/shared/error/error';
 import { UpdateOrderPaymentDTO } from '@/module/order/application/dtos';
-import { PAYMENT_METHOD_VALUE } from '@/module/order/domain/value_objects';
+import { PAYMENT_METHOD_VALUE, PAYMENT_STATUS_VALUE } from '@/module/order/domain/value_objects';
 import { InitiatePaymentDTO } from '../dtos/initiate-payment';
 import axios from 'axios';
 import qs from 'qs';
@@ -106,16 +106,39 @@ export default class ZalopayService {
       throw new BadRequestError('Order already paid');
     }
 
-    await this.orderRepo.updateOrderPayment(orderId, {
+    // Determine success from payload if present, default to success
+    let success = true;
+    if (parsedData.hasOwnProperty('return_code')) {
+      success = parsedData.return_code === 1;
+    } else if (parsedData.hasOwnProperty('returncode')) {
+      success = parsedData.returncode === 1;
+    } else if (parsedData.hasOwnProperty('status')) {
+      success = parsedData.status === 1;
+    } else if (parsedData.hasOwnProperty('resultCode')) {
+      success = Number(parsedData.resultCode) === 0;
+    }
+
+    if (!success) {
+      await this.orderRepo.updateOrderPayment(orderId, {
+        isPaid: false,
+        paymentMethod: PAYMENT_METHOD_VALUE.ZALOPAY_WALLET,
+        paymentStatus: PAYMENT_STATUS_VALUE.FAILED,
+      } as UpdateOrderPaymentDTO);
+      throw new BadRequestError('Unsuccess payment');
+    }
+
+    const orderUpdated = await this.orderRepo.updateOrderPayment(orderId, {
       isPaid: true,
       paymentMethod: PAYMENT_METHOD_VALUE.ZALOPAY_WALLET,
+      paymentStatus: PAYMENT_STATUS_VALUE.SUCCESS,
       bankTransferTime: new Date(),
       bankTransferTransactionCode: app_trans_id,
     } as UpdateOrderPaymentDTO);
 
     return {
-      statusCode: 200,
+      status: 200,
       message: 'Thanh toán bằng ví ZaloPay thành công',
+      data: { orderUpdated },
     };
   };
 }

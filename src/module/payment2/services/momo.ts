@@ -3,7 +3,7 @@ import https from 'https';
 import { TypeORMOrderRepository } from '@/module/order/infrastructure/repository';
 import { BadRequestError } from '@/shared/error/error';
 import { UpdateOrderPaymentDTO } from '@/module/order/application/dtos';
-import { PAYMENT_METHOD_VALUE } from '@/module/order/domain/value_objects';
+import { PAYMENT_METHOD_VALUE, PAYMENT_STATUS_VALUE } from '@/module/order/domain/value_objects';
 import { InitiatePaymentDTO } from '../dtos/initiate-payment';
 import { generatePayID } from '../utils/generate-pay-id';
 
@@ -116,6 +116,17 @@ export default class MomoService {
     const { resultCode, orderId, requestId, amount, signature, extraData } = body;
 
     if (Number(resultCode) !== 0) {
+      // mark order as failed like VNPay flow
+      const maybeOrderId = Number(orderId.split('_')[1]);
+      try {
+        await this.orderRepo.updateOrderPayment(maybeOrderId, {
+          isPaid: false,
+          paymentMethod: PAYMENT_METHOD_VALUE.MOMO_WALLET,
+          paymentStatus: PAYMENT_STATUS_VALUE.FAILED,
+        } as UpdateOrderPaymentDTO);
+      } catch (_err) {
+        // ignore repo errors here; we'll still signal payment failure
+      }
       throw new BadRequestError('Payment failed');
     }
 
@@ -152,6 +163,7 @@ export default class MomoService {
     const orderUpdated = await this.orderRepo.updateOrderPayment(orderSelected.id, {
       isPaid: true,
       paymentMethod: PAYMENT_METHOD_VALUE.MOMO_WALLET,
+      paymentStatus: PAYMENT_STATUS_VALUE.SUCCESS,
       bankTransferTime: new Date(),
       bankTransferTransactionCode: orderId,
     } as UpdateOrderPaymentDTO);
@@ -159,7 +171,7 @@ export default class MomoService {
     return {
       status: 200,
       message: 'Thanh toán bằng ví MoMo thành công',
-      data: orderUpdated,
+      data: { orderUpdated },
     };
   };
 }
