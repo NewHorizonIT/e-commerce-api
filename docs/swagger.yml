@@ -2856,6 +2856,11 @@ components:
           $ref: '#/components/schemas/Category'
         productType:
           $ref: '#/components/schemas/ProductType'
+        variants:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/ProductVariant'
 
     ProductVariant:
       type: object
@@ -2871,10 +2876,25 @@ components:
         imageUrl:
           type: string
           nullable: true
-        valueIds:
+        values:
           type: array
           items:
-            type: integer
+            $ref: '#/components/schemas/ProductVariantValue'
+
+    ProductVariantValue:
+      type: object
+      properties:
+        id:
+          type: integer
+        value:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        variantGroupId:
+          type: integer
+        variantGroupName:
+          type: string
 
     ProductAttributeValue:
       type: object

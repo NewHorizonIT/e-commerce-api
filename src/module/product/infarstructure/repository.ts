@@ -10,6 +10,7 @@ import {
   PaginatedProductsDTO,
   ProductDetailDTO,
   ProductListQueryDTO,
+  ProductVariantDTO,
   ProductSummaryDTO,
   ProductTypeDTO,
   UpdateNamedResourceDTO,
@@ -31,6 +32,7 @@ import {
   VariantGroupEntity,
   VariantValueEntity,
 } from './productEntity';
+import { In } from 'typeorm';
 
 function normalizeListQuery(query: ProductListQueryDTO): ProductListQueryDTO {
   return {
@@ -51,6 +53,52 @@ export class TypeORMProductRepository implements IProductRepository {
   private readonly variantGroupRepo = AppDataSource.getRepository(VariantGroupEntity);
   private readonly variantValueRepo = AppDataSource.getRepository(VariantValueEntity);
   private readonly productDetailRepo = AppDataSource.getRepository(ProductDetailEntity);
+
+  private mapVariantDetails(
+    variant: VariantEntity & { details?: VariantDetailEntity[] }
+  ): ProductVariantDTO {
+    return {
+      id: variant.id,
+      price: Number(variant.price),
+      stockQuantity: variant.stockQuantity,
+      isDefault: variant.isDefault,
+      imageUrl: variant.imageUrl,
+      values: (variant.details ?? [])
+        .slice()
+        .sort((left, right) => left.value.id - right.value.id)
+        .map((detail) => ({
+          id: detail.value.id,
+          value: detail.value.value,
+          imageUrl: detail.value.imageUrl,
+          variantGroupId: detail.value.group.id,
+          variantGroupName: detail.value.group.name,
+        })),
+    };
+  }
+
+  private async loadVariantsByProductId(
+    productIds: number[]
+  ): Promise<Map<number, ProductVariantDTO[]>> {
+    if (productIds.length === 0) {
+      return new Map();
+    }
+
+    const variants = await this.variantRepo.find({
+      where: { productId: In(productIds) },
+      relations: ['details', 'details.value', 'details.value.group'],
+      order: { id: 'ASC' },
+    });
+
+    const variantsByProductId = new Map<number, ProductVariantDTO[]>();
+
+    for (const variant of variants) {
+      const productVariants = variantsByProductId.get(variant.productId) ?? [];
+      productVariants.push(this.mapVariantDetails(variant));
+      variantsByProductId.set(variant.productId, productVariants);
+    }
+
+    return variantsByProductId;
+  }
 
   async listProducts(
     rawQuery: ProductListQueryDTO,
@@ -181,6 +229,14 @@ export class TypeORMProductRepository implements IProductRepository {
       },
     }));
 
+    if (includeHidden && items.length > 0) {
+      const variantsByProductId = await this.loadVariantsByProductId(items.map((item) => item.id));
+
+      for (const item of items) {
+        item.variants = variantsByProductId.get(item.id) ?? [];
+      }
+    }
+
     return {
       items,
       page: query.page,
@@ -247,22 +303,12 @@ export class TypeORMProductRepository implements IProductRepository {
       categoryId: product.categoryId,
       productTypeId: product.productTypeId,
       attributes,
-      variants: product.variants.map((variant) => ({
-        id: variant.id,
-        price: Number(variant.price),
-        stockQuantity: variant.stockQuantity,
-        isDefault: variant.isDefault,
-        imageUrl: variant.imageUrl,
-        values: details
-          .filter((detail) => detail.variantId === variant.id)
-          .map((d) => ({
-            id: d.value.id,
-            value: d.value.value,
-            imageUrl: d.value.imageUrl,
-            variantGroupId: d.value.group.id,
-            variantGroupName: d.value.group.name,
-          })),
-      })),
+      variants: product.variants.map((variant) =>
+        this.mapVariantDetails({
+          ...variant,
+          details: details.filter((detail) => detail.variantId === variant.id),
+        })
+      ),
       variantGroups: variantGroups.map((group) => ({
         id: group.id,
         name: group.name,

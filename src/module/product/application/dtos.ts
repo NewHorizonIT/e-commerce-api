@@ -34,6 +34,7 @@ export interface ProductSummaryDTO {
     id: number;
     name: string;
   };
+  variants?: ProductVariantDTO[];
 }
 
 export interface VariantValueSimpleDTO {
