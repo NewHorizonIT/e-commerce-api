@@ -17,7 +17,7 @@ import {
   PaymentMethod,
   PAYMENT_STATUS_VALUE,
 } from '../domain/value_objects';
-import { VariantEntity } from '@/module/product/infarstructure/productEntity';
+import { VariantEntity } from '@/module/product/infrastructure/productEntity';
 import { VariantNotFoundError } from '@/module/product/application/usecase/errors';
 import { FailedOrderCreationError } from '../domain/errors';
 import { DiscountType } from '@/module/discount/domain/value_objects';

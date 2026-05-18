@@ -9,13 +9,13 @@ import {
   VariantEntity,
   VariantGroupEntity,
   VariantValueEntity,
-} from '../src/module/product/infarstructure/productEntity';
+} from '../src/module/product/infrastructure/productEntity';
 import {
   AttributeEntity,
   ProductDetailEntity,
   CategoryDetailEntity,
   MediaFileEntity,
-} from '../src/module/product/infarstructure/productEntity';
+} from '../src/module/product/infrastructure/productEntity';
 
 async function seed(): Promise<void> {
   await AppDataSource.initialize();

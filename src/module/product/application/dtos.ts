@@ -163,12 +163,6 @@ export interface CreateVariantValueDTO {
   imageUrl?: string;
 }
 
-export interface VariantValueSimpleDTO {
-  id: number;
-  value: string;
-  imageUrl: string | null;
-}
-
 export interface UpdateVariantValueDTO {
   value?: string;
   imageUrl?: string;

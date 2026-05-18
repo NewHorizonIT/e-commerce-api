@@ -1,21 +1,19 @@
+import 'reflect-metadata';
+import { container } from 'tsyringe';
 import { IProductModulePort } from './application/module_port';
-import ProductUseCases from './application/usecase/productUseCases';
-import { TypeORMProductRepository } from './infarstructure/repository';
-import { ProductModuleAdapter } from './module_adapter';
+import { registerProductDependencies } from './container';
 import { ProductController } from './presentation/controller';
 import { createProductRouter } from './presentation/router';
+import { PRODUCT_TOKENS } from './tokens';
 
 export class ProductModule {
   public readonly router;
   public readonly publicApi: IProductModulePort;
 
   constructor() {
-    const productRepository = new TypeORMProductRepository();
-    const productUseCases = new ProductUseCases(productRepository);
-
-    this.publicApi = new ProductModuleAdapter(productUseCases);
-
-    const controller = new ProductController(this.publicApi);
+    registerProductDependencies(container);
+    this.publicApi = container.resolve<IProductModulePort>(PRODUCT_TOKENS.IProductModulePort);
+    const controller = container.resolve(ProductController);
     this.router = createProductRouter(controller);
   }
 }

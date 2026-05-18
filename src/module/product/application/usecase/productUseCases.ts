@@ -30,9 +30,15 @@ import {
   VariantValueNotFoundError,
 } from './errors';
 import { IProductRepository } from '../../domain/interface';
+import { inject, injectable } from 'tsyringe';
+import { PRODUCT_TOKENS } from '../../tokens';
 
+@injectable()
 export default class ProductUseCases {
-  constructor(private readonly productRepository: IProductRepository) {}
+  constructor(
+    @inject(PRODUCT_TOKENS.IProductRepository)
+    private readonly productRepository: IProductRepository
+  ) {}
 
   listPublicProducts(query: ProductListQueryDTO): Promise<PaginatedProductsDTO> {
     return this.productRepository.listProducts(query, false);

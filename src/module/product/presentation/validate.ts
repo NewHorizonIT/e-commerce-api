@@ -46,10 +46,6 @@ export const productTypeParamSchema = z.object({
   productTypeId: z.coerce.number().int().positive(),
 });
 
-export const variantStockParamSchema = z.object({
-  variantId: z.coerce.number().int().positive(),
-});
-
 export const createProductSchema = z.object({
   name: z.string().trim().min(1).max(255),
   description: z.string().trim().max(255).optional(),

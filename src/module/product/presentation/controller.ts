@@ -1,14 +1,21 @@
 import type { Request, Response } from 'express';
 import { IProductModulePort } from '../application/module_port';
+import { ProductListQueryDTO } from '../application/dtos';
 import { appLogger } from '@/shared/logging/appLogger';
 import SuccessResponse from '@/shared/response/writeResponse';
 import { StatusCode } from '@/shared/response/statusCode';
+import { inject, injectable } from 'tsyringe';
+import { PRODUCT_TOKENS } from '../tokens';
 
+@injectable()
 export class ProductController {
-  constructor(private readonly productModulePort: IProductModulePort) {}
+  constructor(
+    @inject(PRODUCT_TOKENS.IProductModulePort)
+    private readonly productModulePort: IProductModulePort
+  ) {}
 
   async listPublicProducts(req: Request, res: Response): Promise<void> {
-    const products = await this.productModulePort.listPublicProducts(req.query as never);
+    const products = await this.productModulePort.listPublicProducts(req.query as unknown as ProductListQueryDTO);
     new SuccessResponse(products, undefined, StatusCode.OK).send(res);
   }
 
@@ -19,7 +26,7 @@ export class ProductController {
   }
 
   async listAdminProducts(req: Request, res: Response): Promise<void> {
-    const products = await this.productModulePort.listAdminProducts(req.query as never);
+    const products = await this.productModulePort.listAdminProducts(req.query as unknown as ProductListQueryDTO);
     new SuccessResponse(products, undefined, StatusCode.OK).send(res);
   }
 
@@ -78,7 +85,7 @@ export class ProductController {
   }
 
   async updateVariantStock(req: Request, res: Response): Promise<void> {
-    const { variantId } = req.params as { variantId: string };
+    const { variantId } = req.params as { productId: string; variantId: string };
     await this.productModulePort.updateVariantStock(Number(variantId), req.body);
     res.status(204).send();
   }

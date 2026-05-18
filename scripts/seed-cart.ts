@@ -1,6 +1,6 @@
 import { AppDataSource } from "../src/config/database";
 import { CartEntity, CartItemDetailEntity } from '../src/module/cart/infrastructure/cartEntity';
-import { VariantEntity } from '../src/module/product/infarstructure/productEntity';
+import { VariantEntity } from '../src/module/product/infrastructure/productEntity';
 import { AccountEntity } from '../src/module/auth/infarstructure/accountEntity';
 
 async function seedCart(): Promise<void> {

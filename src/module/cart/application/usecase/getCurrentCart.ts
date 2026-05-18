@@ -8,7 +8,7 @@ import {
   VariantEntity,
   ProductEntity,
   VariantDetailEntity,
-} from '@/module/product/infarstructure/productEntity';
+} from '@/module/product/infrastructure/productEntity';
 
 @injectable()
 export default class GetCurrentCartUseCase {

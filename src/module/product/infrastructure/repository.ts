@@ -1,4 +1,6 @@
 import { AppDataSource } from '@/config';
+import { injectable } from 'tsyringe';
+import { ProductNotFoundError } from '../application/usecase/errors';
 import {
   CategoryDTO,
   CreateNamedResourceDTO,
@@ -46,6 +48,7 @@ function normalizeListQuery(query: ProductListQueryDTO): ProductListQueryDTO {
   };
 }
 
+@injectable()
 export class TypeORMProductRepository implements IProductRepository {
   private readonly productRepo = AppDataSource.getRepository(ProductEntity);
   private readonly variantRepo = AppDataSource.getRepository(VariantEntity);
@@ -509,7 +512,7 @@ export class TypeORMProductRepository implements IProductRepository {
     const product = await this.productRepo.findOne({ where: { id: productId } });
 
     if (!product) {
-      throw new Error('Product not found');
+      throw new ProductNotFoundError(productId);
     }
 
     const created = await this.variantGroupRepo.save(

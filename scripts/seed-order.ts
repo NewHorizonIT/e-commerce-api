@@ -4,7 +4,7 @@ import {
   OrderItemEntity,
   OrderStatusHistoryEntity,
 } from '../src/module/order/infrastructure/order-entity';
-import { VariantEntity } from '../src/module/product/infarstructure/productEntity';
+import { VariantEntity } from '../src/module/product/infrastructure/productEntity';
 import { AccountEntity } from '../src/module/auth/infarstructure/accountEntity';
 import { DiscountCodeEntity } from '../src/module/discount/infrastructure/discount-entity';
 import {

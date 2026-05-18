@@ -1,5 +1,7 @@
+import { inject, injectable } from 'tsyringe';
 import {
   AccountListQueryDTO,
+  AdminAccountResponseDTO,
   AuthAccountDTO,
   AuthSessionDTO,
   AuthSessionInfoDTO,
@@ -8,18 +10,16 @@ import {
   PaginatedAdminAccountsDTO,
   ResetPasswordDTO,
   UpdateAccountDTO,
-  AdminAccountResponseDTO,
 } from './application/dtos';
-import { inject, injectable } from 'tsyringe';
 import { IAuthModulePort } from './application/module_port';
 import GetCurrentSessionUseCase from './application/usecase/getCurrentSession';
+import LockAccountUseCase from './application/usecase/lockAccount';
 import LoginUseCase from './application/usecase/login';
 import LogoutUseCase from './application/usecase/logout';
 import RefreshTokenUseCase from './application/usecase/refreshToken';
 import RegisterUseCase from './application/usecase/register';
-import LockAccountUseCase from './application/usecase/lockAccount';
-import UnlockAccountUseCase from './application/usecase/unlockAccount';
 import ResetPasswordUseCase from './application/usecase/resetPassword';
+import UnlockAccountUseCase from './application/usecase/unlockAccount';
 import UpdateAccountUseCase from './application/usecase/updateAccount';
 import { IAccountRepository } from './domain/interface';
 import { AUTH_TOKENS } from './tokens';
@@ -30,13 +30,12 @@ export class AuthModuleAdapter implements IAuthModulePort {
     @inject(AUTH_TOKENS.RegisterUseCase)
     private readonly registerUseCase: RegisterUseCase,
     @inject(AUTH_TOKENS.LoginUseCase)
-    @inject(LoginUseCase)
     private readonly loginUseCase: LoginUseCase,
-    @inject(RefreshTokenUseCase)
+    @inject(AUTH_TOKENS.RefreshTokenUseCase)
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
-    @inject(LogoutUseCase)
+    @inject(AUTH_TOKENS.LogoutUseCase)
     private readonly logoutUseCase: LogoutUseCase,
-    @inject(GetCurrentSessionUseCase)
+    @inject(AUTH_TOKENS.GetCurrentSessionUseCase)
     private readonly getCurrentSessionUseCase: GetCurrentSessionUseCase,
     @inject(AUTH_TOKENS.LockAccountUseCase)
     private readonly lockAccountUseCase: LockAccountUseCase,

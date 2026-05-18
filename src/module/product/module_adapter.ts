@@ -21,9 +21,15 @@ import {
 } from './application/dtos';
 import { IProductModulePort } from './application/module_port';
 import ProductUseCases from './application/usecase/productUseCases';
+import { inject, injectable } from 'tsyringe';
+import { PRODUCT_TOKENS } from './tokens';
 
+@injectable()
 export class ProductModuleAdapter implements IProductModulePort {
-  constructor(private readonly productUseCases: ProductUseCases) {}
+  constructor(
+    @inject(PRODUCT_TOKENS.ProductUseCases)
+    private readonly productUseCases: ProductUseCases
+  ) {}
 
   listPublicProducts(query: ProductListQueryDTO): Promise<PaginatedProductsDTO> {
     return this.productUseCases.listPublicProducts(query);
