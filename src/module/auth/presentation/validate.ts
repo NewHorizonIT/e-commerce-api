@@ -26,6 +26,23 @@ export const listAccountsQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).optional(),
 });
 
+export const accountIdParamSchema = z.object({
+  id: z.coerce.number().int().positive('id must be a positive integer'),
+});
+
+export function validateParams<T>(schema: z.ZodType<T>): RequestHandler {
+  return (req, _res, next) => {
+    const result = schema.safeParse(req.params);
+
+    if (!result.success) {
+      return next(new BadRequestError('Request params validation failed', result.error.flatten()));
+    }
+
+    req.params = result.data as any;
+    return next();
+  };
+}
+
 export function validateBody<T>(schema: z.ZodType<T>): RequestHandler {
   return (req, _res, next) => {
     const result = schema.safeParse(req.body);
@@ -62,17 +79,7 @@ export const requireRefreshTokenCookie: RequestHandler = (req, _res, next) => {
   return next();
 };
 
-export const lockUnlockSchema = z.object({
-  accountId: z.number().int().positive('accountId must be a positive integer'),
-  isLocked: z.boolean(),
-});
-
-export const resetPasswordSchema = z.object({
-  accountId: z.number().int().positive('accountId must be a positive integer'),
-});
-
 export const updateAccountSchema = z.object({
-  accountId: z.number().int().positive('accountId must be a positive integer'),
   phoneNum: phoneNumberSchema.optional(),
   password: z
     .string()

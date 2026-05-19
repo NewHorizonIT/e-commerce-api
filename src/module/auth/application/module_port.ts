@@ -1,5 +1,4 @@
 // Define interface for method of port
-
 import {
   AccountListQueryDTO,
   AdminAccountResponseDTO,

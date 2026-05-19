@@ -1,12 +1,3 @@
-// Domain errors for the Auth module.
-//
-// Rules:
-//  1. Extend AppError — never extend raw Error.
-//  2. Each class owns its semantic ERROR CODE (AUTH_*) and HTTP status.
-//  3. Keep constructors lean: accept only domain-meaningful params,
-//     NOT a generic `message` or `code` from the caller.
-//  4. Optional `cause` is for wrapping an upstream error (infra, external lib).
-
 import { AppError } from '@/shared/error/error';
 
 export class InvalidPhoneNumberError extends AppError {

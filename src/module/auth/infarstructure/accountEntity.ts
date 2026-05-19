@@ -1,6 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { AccountCredentialEntity } from '@/module/auth/infarstructure/accountCerdential';
+import { AccountOAuthEntity } from '@/module/auth/infarstructure/accountOAuth';
+import { Column, CreateDateColumn, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import Account from '../domain/domain';
-import { PhoneNumber } from '../domain/value_objects';
+import { PhoneNumber, typeAuth } from '../domain/value_objects';
 
 @Entity('accounts')
 export class AccountEntity {
@@ -8,14 +10,20 @@ export class AccountEntity {
   id!: number;
   @Column({ type: 'varchar', length: 15, unique: true })
   phoneNum!: string;
-  @Column({ type: 'varchar', length: 255 })
-  password!: string;
   @CreateDateColumn()
   createdDate!: Date;
+  @Column({ enum: [typeAuth.CERDENTIAL, typeAuth.OAUTH], type: 'enum', length: 20 })
+  type!: typeAuth;
   @Column({ type: 'varchar', length: 10, default: 'user' })
   role!: 'admin' | 'user';
   @Column({ type: 'boolean', default: false })
   isLocked!: boolean;
+
+  @OneToOne(() => AccountCredentialEntity, (credential) => credential.account)
+  credential?: AccountCredentialEntity;
+
+  @OneToOne(() => AccountOAuthEntity, (oauth) => oauth.account)
+  oauth?: AccountOAuthEntity;
 }
 
 export class AccountMapper {
@@ -23,8 +31,8 @@ export class AccountMapper {
     return Account.rehydrate({
       id: entity.id,
       phoneNum: new PhoneNumber(entity.phoneNum),
-      passwordHash: entity.password,
       createdDate: entity.createdDate,
+      type: entity.type as typeAuth,
       isLocked: entity.isLocked,
       role: entity.role as 'admin' | 'user',
     });
@@ -38,7 +46,6 @@ export class AccountMapper {
     }
 
     entity.phoneNum = domain.getPhoneNum().value;
-    entity.password = domain.getPassword();
 
     if (domain.getCreatedDate()) {
       entity.createdDate = domain.getCreatedDate() as Date;

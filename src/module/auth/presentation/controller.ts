@@ -88,22 +88,25 @@ export class AuthController {
   }
 
   async lockAccount(req: Request, res: Response): Promise<void> {
-    const result = await this.authModulePort.lockAccount(req.body);
+    const accountId = Number(req.params.id);
+    const result = await this.authModulePort.lockAccount({ accountId, isLocked: true });
     new SuccessResponse(result, 'Account locked successfully', StatusCode.OK).send(res);
   }
 
   async unlockAccount(req: Request, res: Response): Promise<void> {
-    const result = await this.authModulePort.unlockAccount(req.body);
+    const accountId = Number(req.params.id);
+    const result = await this.authModulePort.unlockAccount({ accountId, isLocked: false });
     new SuccessResponse(result, 'Account unlocked successfully', StatusCode.OK).send(res);
   }
 
   async resetPassword(req: Request, res: Response): Promise<void> {
-    const result = await this.authModulePort.resetPassword(req.body);
+    const accountId = Number(req.params.id);
+    const result = await this.authModulePort.resetPassword({ accountId });
     new SuccessResponse(result, 'Password reset to default successfully', StatusCode.OK).send(res);
   }
 
   async updateAccount(req: Request, res: Response): Promise<void> {
-    const result = await this.authModulePort.updateAccount(req.body);
+    const result = await this.authModulePort.updateAccount({ accountId: req.userId!, ...req.body });
     new SuccessResponse(result, 'Account updated successfully', StatusCode.OK).send(res);
   }
 }

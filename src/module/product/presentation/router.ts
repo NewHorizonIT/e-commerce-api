@@ -1,14 +1,14 @@
-import { Router } from 'express';
 import authenticate from '@/shared/middleware/authenticate';
 import authorizeRole from '@/shared/middleware/authorizeRole';
+import { Router } from 'express';
 import { ProductController } from './controller';
 import {
   categoryParamSchema,
   createNamedResourceSchema,
   createProductSchema,
   createVariantGroupSchema,
-  createVariantValueSchema,
   createVariantSchema,
+  createVariantValueSchema,
   deleteProductQuerySchema,
   groupParamSchema,
   idParamSchema,
@@ -17,9 +17,9 @@ import {
   updateNamedResourceSchema,
   updateProductSchema,
   updateVariantGroupSchema,
-  updateVariantValueSchema,
   updateVariantSchema,
   updateVariantStockSchema,
+  updateVariantValueSchema,
   updateVisibilitySchema,
   validateRequest,
   valueParamSchema,

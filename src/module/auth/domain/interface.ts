@@ -1,16 +1,6 @@
-// Define interface
+import { AccountListQueryDTO, PaginatedAdminAccountsDTO } from '../application/dtos';
 import Account from './domain';
 import { PhoneNumber } from './value_objects';
-import { AccountListQueryDTO, PaginatedAdminAccountsDTO } from '../application/dtos';
-
-/*
-  Example:
-
-  export interface IUserRepository {
-    findById(id: string): Promise<User | null>;
-    save(user: User): Promise<void>;
-  }
-*/
 
 export interface IAccountRepository {
   findById(id: number): Promise<Account | null>;

@@ -3,25 +3,11 @@
 import { AppDataSource } from '@/config';
 import { injectable } from 'tsyringe';
 import { Repository } from 'typeorm';
+import { AccountListQueryDTO, PaginatedAdminAccountsDTO } from '../application/dtos';
 import Account from '../domain/domain';
 import { IAccountRepository } from '../domain/interface';
 import { PhoneNumber } from '../domain/value_objects';
 import { AccountEntity, AccountMapper } from './accountEntity';
-import { AccountListQueryDTO, PaginatedAdminAccountsDTO } from '../application/dtos';
-
-/*
-  Example:
-
-  class <NameRepository> implements I<NameRepository> {
-    async findById(id: string): Promise<User | null> {
-      // Implement the logic to find a user by ID
-    }
-
-    async save(user: User): Promise<void> {
-      // Implement the logic to save a user
-    }
-  }
-*/
 
 @injectable()
 export class TypeORMAccountRepository implements IAccountRepository {

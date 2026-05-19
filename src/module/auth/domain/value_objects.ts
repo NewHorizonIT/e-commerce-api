@@ -33,3 +33,8 @@ export class PhoneNumber {
     return re.test(phoneNum);
   }
 }
+
+export enum typeAuth {
+  'CERDENTIAL' = 'credential',
+  'OAUTH' = 'oauth',
+}

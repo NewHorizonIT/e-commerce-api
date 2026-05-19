@@ -7,8 +7,8 @@ import {
   requireRefreshTokenCookie,
   validateBody,
   validateQuery,
-  lockUnlockSchema,
-  resetPasswordSchema,
+  validateParams,
+  accountIdParamSchema,
   updateAccountSchema,
 } from './validate';
 import authenticate from '@/shared/middleware/authenticate';
@@ -39,36 +39,36 @@ export function createAuthRouter(controller: AuthController): Router {
     controller.logout.bind(controller)
   );
 
+  authRouter.patch(
+    '/accounts/me',
+    authenticate,
+    validateBody(updateAccountSchema),
+    controller.updateAccount.bind(controller)
+  );
+
   // Admin endpoints
   authRouter.patch(
-    '/lock-user',
+    '/accounts/:id/lock',
     authenticate,
     authorizeRole('admin'),
-    validateBody(lockUnlockSchema),
+    validateParams(accountIdParamSchema),
     controller.lockAccount.bind(controller)
   );
 
   authRouter.patch(
-    '/unlock-user',
+    '/accounts/:id/unlock',
     authenticate,
     authorizeRole('admin'),
-    validateBody(lockUnlockSchema),
+    validateParams(accountIdParamSchema),
     controller.unlockAccount.bind(controller)
   );
 
-  authRouter.patch(
-    '/reset-password',
+  authRouter.post(
+    '/accounts/:id/reset-password',
     authenticate,
     authorizeRole('admin'),
-    validateBody(resetPasswordSchema),
+    validateParams(accountIdParamSchema),
     controller.resetPassword.bind(controller)
-  );
-
-  authRouter.patch(
-    '/account',
-    authenticate,
-    validateBody(updateAccountSchema),
-    controller.updateAccount.bind(controller)
   );
 
   return authRouter;
